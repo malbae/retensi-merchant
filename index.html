@@ -1704,8 +1704,12 @@ function openExcelPreview(){
     <div class="export-preview-actions"><button class="export-confirm" type="button" onclick="exportDatabaseExcel()">Unduh Excel sekarang</button><button class="export-back" type="button" onclick="openDataCenter()">Kembali</button></div>`;
   document.getElementById('drawerBackdrop').classList.add('open');renderExcelPreview();addAudit('database_preview_excel',`Preview Excel dibuka: ${data.length} merchant`);
 }
+function excelPreviewSearchMatch(row,query){
+  const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),terms=normalize(query).split(' ').filter(Boolean),words=normalize([row.name,row.legalOwner,row.account,row.mids,row.city,row.branch].join(' ')).split(' ').filter(Boolean);
+  return !terms.length||terms.every(term=>words.some(word=>word.startsWith(term)));
+}
 function renderExcelPreview(){
-  const query=(document.getElementById('excelPreviewSearch')?.value||'').trim().toLowerCase(),channel=document.getElementById('excelPreviewChannel')?.value||'ALL',all=merchantExcelRows(),filtered=all.filter(row=>(channel==='ALL'||row.channel===channel)&&(!query||[row.name,row.account,row.mids,row.city,row.branch].join(' ').toLowerCase().includes(query))),shown=filtered.slice(0,50),body=document.getElementById('excelPreviewBody'),meta=document.getElementById('excelPreviewMeta');if(!body||!meta)return;
+  const query=(document.getElementById('excelPreviewSearch')?.value||'').trim(),channel=document.getElementById('excelPreviewChannel')?.value||'ALL',all=merchantExcelRows(),filtered=all.filter(row=>(channel==='ALL'||row.channel===channel)&&excelPreviewSearchMatch(row,query)),shown=filtered.slice(0,50),body=document.getElementById('excelPreviewBody'),meta=document.getElementById('excelPreviewMeta');if(!body||!meta)return;
   body.innerHTML=shown.map((row,index)=>`<tr><td class="num">${index+1}</td><td>${esc(row.channel)}</td><td><b>${esc(row.name)}</b><br><span style="color:#82919b">${esc(row.legalOwner)}</span></td><td>${esc(row.account)}</td><td>${esc(row.city||row.branch)}</td><td class="num">${compact(row.sv)}</td><td class="num">${compact(row.avbal)}</td><td class="num">${pct(row.retention)}</td><td class="num">${compact(row.gap)}</td><td>${esc(row.source)}${row.dataCheck&&row.dataCheck!=='unverified'?'<br>'+esc(row.dataCheck):''}</td></tr>`).join('')||'<tr><td colspan="10" style="padding:28px;text-align:center;color:#7c8b96">Tidak ada data yang sesuai pencarian.</td></tr>';
   meta.textContent=`Menampilkan ${idFmt.format(shown.length)} dari ${idFmt.format(filtered.length)} baris yang sesuai. File Excel tetap memuat seluruh ${idFmt.format(all.length)} baris dan 37 kolom.`;
 }
