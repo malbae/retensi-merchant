@@ -20,6 +20,10 @@ Database ini cocok untuk prototype statis karena tidak memerlukan kredensial ata
 
 Untuk penggunaan multi-user/produksi, pindahkan implementasi `MerchantDB` di `database.js` ke API backend dengan autentikasi/SSO. Jangan menaruh service key database di repository atau JavaScript browser.
 
-## Deploy dari GitHub
+## Website GitHub Pages
 
-Repository tetap dapat digunakan sebagai sumber deploy Netlify. `netlify.toml` mempublikasikan root repository sehingga setiap push ke branch deploy akan membangun versi terbaru tanpa langkah build tambahan.
+Website publik utama tersedia di:
+
+<https://malbae.github.io/retensi-merchant/>
+
+GitHub Pages menyajikan file langsung dari repository ini. Setelah perubahan di-push ke branch `main`, tunggu proses publikasi GitHub Pages selesai lalu muat ulang URL tersebut. Bila browser masih menampilkan versi lama, lakukan hard refresh agar cache asset diperbarui.
