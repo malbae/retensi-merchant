@@ -848,7 +848,11 @@ body{background:#eef3f7;color:var(--mandiri-ink)}
 .potential-results{margin-top:0}.potential-actions{position:sticky;bottom:-26px;background:rgba(255,255,255,.96);padding:12px 0 2px;border-top:1px solid #edf1f4;backdrop-filter:blur(8px)}
 .db-status{display:inline-flex;align-items:center;gap:7px;padding:7px 9px;border-radius:999px;background:#e9f7f1;color:#197551;font-size:8px;font-weight:900}.db-status:before{content:"";width:7px;height:7px;border-radius:99px;background:#28a36e;box-shadow:0 0 0 3px rgba(40,163,110,.12)}
 .data-center{display:grid;gap:12px}.data-card{padding:15px;border:1px solid var(--line);border-radius:16px;background:#fbfcfd}.data-card h3{margin:0;color:var(--navy);font-size:13px}.data-card p{font-size:9px;color:#6e7e8a;line-height:1.55;margin:6px 0 0}.data-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.data-actions button,.file-import-label{border:0;border-radius:10px;padding:10px 12px;background:var(--navy);color:#fff;font-size:8px;font-weight:900;cursor:pointer}.file-import-label{background:#eef4f8;color:#36566c;border:1px solid #d9e4eb}.file-import-label input{display:none}.data-note{padding:11px 12px;border-radius:13px;background:#fff7df;border:1px solid #efdc9c;color:#6b581c;font-size:8.5px;line-height:1.5}
+.register-launch{border:0;background:var(--navy);color:#fff;border-radius:999px;padding:9px 13px;font-size:8px;font-weight:900;white-space:nowrap}.register-launch:hover{background:#0b5f9e}
+.register-channel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.register-channel button{border:1px solid var(--line);background:#f7f9fb;color:#627483;border-radius:12px;padding:11px;font-size:9px;font-weight:900}.register-channel button.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.register-form{display:grid;gap:12px;margin-top:14px}.register-block{border:1px solid #e0e8ee;border-radius:16px;background:#fbfcfd;padding:14px}.register-block h3{margin:0 0 3px;color:var(--navy);font-size:12px}.register-block>p{margin:0 0 12px;color:#7a8a95;font-size:8px;line-height:1.5}.register-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.register-field.full{grid-column:1/-1}.register-field label{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:900;color:#70828f;margin-bottom:5px}.register-field label span{color:#b94b43}.register-field input,.register-field select,.register-field textarea{width:100%;border:1px solid #dce5eb;border-radius:11px;padding:10px 11px;background:#fff;color:#27465a;font-size:9px;outline:none}.register-field textarea{min-height:70px;resize:vertical}.register-field input:focus,.register-field textarea:focus,.register-field select:focus{border-color:#80b8dc;box-shadow:0 0 0 3px rgba(8,119,201,.08)}.register-help{display:block;font-size:7.5px;color:#89959e;margin-top:5px;line-height:1.4}.register-error{display:none;padding:10px 11px;border-radius:11px;background:#fce9e6;color:#a23f38;font-size:8.5px;line-height:1.45}.register-error.show{display:block}.register-actions{display:flex;align-items:center;gap:9px;position:sticky;bottom:-26px;background:rgba(255,255,255,.97);padding:12px 0 2px;border-top:1px solid #edf1f4}.register-actions button{border:0;border-radius:11px;padding:11px 14px;font-size:9px;font-weight:900}.register-save{background:var(--navy);color:#fff}.register-cancel{background:#edf3f7;color:#476477}
 @media(max-width:760px){.flow-steps{gap:5px}.flow-arrow{display:none}.flow-step{flex:1;min-width:92px}.potential-actions{bottom:0}}
+@media(max-width:760px){.register-grid{grid-template-columns:1fr}.register-field.full{grid-column:auto}.register-actions{bottom:0}.workspace-head .register-launch{order:4}}
 
 </style>
 </head>
@@ -915,6 +919,7 @@ body{background:#eef3f7;color:var(--mandiri-ink)}
             <button onclick="openWorkspace('LIVIN')">Buka Livin' Merchant</button>
             <button onclick="openFairnessCenter()">Pusat Multifaktor & Bias</button>
             <button onclick="openMethodology()">Lihat metodologi</button>
+            <button onclick="openMerchantRegistration()">+ Daftarkan merchant</button>
             <button onclick="openDataCenter()">Database & backup</button>
             <button onclick="logoutPrototype()">Keluar</button>
           </div>
@@ -951,6 +956,7 @@ body{background:#eef3f7;color:var(--mandiri-ink)}
           <button id="tabEdc" onclick="openWorkspace('EDC')">EDC</button>
           <button id="tabLivin" onclick="openWorkspace('LIVIN')">Livin' Merchant</button>
         </div>
+        <button class="register-launch" onclick="openMerchantRegistration(currentKanal)">+ Merchant baru</button>
         <button class="workspace-fair-btn" onclick="openFairnessCenter()" style="border:1px solid #dce6ee;background:#f8fbfd;color:#395a71;border-radius:999px;padding:9px 11px;font-size:8px;font-weight:900;white-space:nowrap">Multifaktor & Bias</button>
         <div class="workspace-search"><input id="workspaceSearch" placeholder="Cari brand, nama legal, rekening, pemilik..." oninput="renderWorkspace(true)"/></div>
       <div class="workspace-session" id="workspaceSessionMini"></div>
@@ -1042,7 +1048,7 @@ function retentionStatus(ratio){if(ratio===null||ratio===undefined)return {key:'
 function summarizeEdc(){const metrics=EDC_RELATIONSHIPS.map(edcMetric);return {count:EDC_RELATIONSHIPS.length,mapped:metrics.filter(x=>x.avbal!==null).length,below:metrics.filter(x=>x.ratio!==null&&x.ratio<.10).length,to20:metrics.filter(x=>x.ratio!==null&&x.ratio>=.10&&x.ratio<.20).length,achieved:metrics.filter(x=>x.ratio!==null&&x.ratio>=.20).length,gap:metrics.reduce((a,x)=>a+(x.gap||0),0)}}
 function summarizeLivin(){const metrics=LIVIN_MERCHANTS.map(livinMetric);return {count:LIVIN_MERCHANTS.length,mapped:metrics.filter(x=>x.implied!==null).length,below:metrics.filter(x=>x.ratio!==null&&x.ratio<.10).length,to20:metrics.filter(x=>x.ratio!==null&&x.ratio>=.10&&x.ratio<.20).length,achieved:metrics.filter(x=>x.ratio!==null&&x.ratio>=.20).length,gap:metrics.reduce((a,x)=>a+(x.gap||0),0)}}
 
-const E_SUM=summarizeEdc(),L_SUM=summarizeLivin();
+let E_SUM=summarizeEdc(),L_SUM=summarizeLivin();
 function renderHome(){
   document.getElementById('homeEdcSummary').innerHTML=`
     <div class="mini-stat"><span>Relasi settlement</span><b>${idFmt.format(E_SUM.count)}</b></div>
@@ -1527,9 +1533,82 @@ function openFairnessCenter(){if(!currentUser)return;closeDrawer();jedaPrioritas
 const _openMethodologyV2=openMethodology;
 openMethodology=function(){if(!currentUser)return;_openMethodologyV2();const d=document.getElementById('detailDrawer');d.insertAdjacentHTML('beforeend',`<div class="detail-section"><h3>Metodologi Anti-Bias & Multifaktor</h3><div class="detail-note"><b>Sistem tidak menjanjikan “bias-free”.</b> Kontrol yang diterapkan: atribut orang/role tidak masuk score; missing factor tidak bernilai nol; confidence dipisahkan; EDC actual dan Livin estimate tetap dibedakan; override wajib alasan dan tidak mengubah score.</div><div class="calc-card"><div class="formula">Multifactor Score = Σ(weight × normalized factor) ÷ Σ(weight available) × 100\nWeights: Gap 30% · SV 20% · Retention Need 20% · Momentum 15% · Potential 10% · Readiness 5%\nConfidence = 65% × available-weight coverage + 35% × source reliability</div></div></div><div class="detail-section"><h3>Efektivitas & Efisiensi</h3><div class="calc-card"><div class="formula">Business Effectiveness = Σ Verified Gap Closed ÷ Σ Baseline Gap\nExecution Effectiveness = 60% × Productive Outcome Rate + 40% × High-Priority Coverage\nEfficiency = Verified Gap Closed ÷ Total Action\nProductive Efficiency = Verified Gap Closed ÷ Productive Action</div></div><div class="detail-note">Call/meeting tidak otomatis dianggap sukses. Nilai finansial hanya berasal dari gap closed yang ditandai verified pada action log.</div></div>`);addAudit('view_methodology','Metodologi dibuka')};
 
+// ----- Registration for new EDC / Livin' merchants -----
+const REGISTERED_MERCHANTS_KEY='mandiriRegisteredMerchantsV1';
+function registeredMerchantStore(){return MerchantDB.read(REGISTERED_MERCHANTS_KEY,{edc:[],livin:[]})||{edc:[],livin:[]}}
+function refreshPortfolioSummary(){E_SUM=summarizeEdc();L_SUM=summarizeLivin()}
+function loadRegisteredMerchants(){
+  const saved=registeredMerchantStore();
+  for(const row of saved.edc||[])if(!EDC_RELATIONSHIPS.some(x=>x.id===row.id))EDC_RELATIONSHIPS.push(row);
+  for(const row of saved.livin||[])if(!LIVIN_MERCHANTS.some(x=>x.key===row.key))LIVIN_MERCHANTS.push(row);
+  refreshPortfolioSummary();
+  if(currentUser){renderHome();if(!document.getElementById('workspaceView').classList.contains('hidden'))renderWorkspace(false)}
+}
+function registerField(id,label,type='text',required=false,placeholder='',help='',full=false){return `<div class="register-field ${full?'full':''}"><label for="${id}">${label}${required?' <span>*</span>':''}</label><input id="${id}" type="${type}" ${type==='number'?'min="0" step="any" inputmode="decimal"':''} ${required?'required':''} placeholder="${placeholder}">${help?`<span class="register-help">${help}</span>`:''}</div>`}
+function registrationSpecificFields(channel){
+  if(channel==='EDC')return `<div class="register-block"><h3>2. Data EDC dan funding</h3><p>Data ini langsung membentuk rasio retensi dan gap menuju target 20%.</p><div class="register-grid">
+    ${registerField('regMid','MID','text',true,'Contoh: 71160547405')}
+    ${registerField('regEdcCount','Jumlah mesin EDC','number',true,'1')}
+    ${registerField('regSvCurrent','Sales volume YTD saat ini','number',true,'Contoh: 500000000','Masukkan nominal Rupiah tanpa titik atau koma.')}
+    ${registerField('regSvPrevious','Sales volume YTD tahun lalu','number',false,'Opsional','Dipakai untuk membaca momentum pertumbuhan.')}
+    ${registerField('regAvbalCurrent','AVBAL aktual','number',true,'Contoh: 75000000','Saldo rata-rata aktual rekening settlement.')}
+  </div></div>`;
+  return `<div class="register-block"><h3>2. Data Livin' Merchant</h3><p>Sistem menghitung growth YoY dan estimasi retensi dari data berikut.</p><div class="register-grid">
+    ${registerField('regMidStatic','MID static','text',false,'Opsional')}
+    ${registerField('regMidDynamic','MID dynamic','text',false,'Opsional')}
+    ${registerField('regSvCurrent','Sales volume YTD saat ini','number',true,'Contoh: 250000000','Masukkan nominal Rupiah tanpa titik atau koma.')}
+    ${registerField('regAvbalPrevious','AVBAL rekening tahun lalu','number',true,'Contoh: 40000000')}
+    ${registerField('regAvbalCurrent','AVBAL rekening saat ini','number',true,'Contoh: 50000000','Growth dan persentase YoY dihitung otomatis.')}
+    ${registerField('regLob','Jenis usaha','text',false,'Contoh: Restoran / Retail')}
+  </div></div>`;
+}
+function openMerchantRegistration(channel=currentKanal||'EDC'){
+  if(!currentUser)return;channel=channel==='LIVIN'?'LIVIN':'EDC';
+  const drawer=document.getElementById('detailDrawer');
+  drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Master data merchant</div><h2>Daftarkan Merchant Baru</h2><p>Merchant yang tersimpan langsung masuk ke daftar, pencarian, scoring, dan detail.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div>
+    <div class="register-channel"><button class="${channel==='EDC'?'active':''}" onclick="openMerchantRegistration('EDC')">Merchant EDC</button><button class="${channel==='LIVIN'?'active':''}" onclick="openMerchantRegistration('LIVIN')">Livin' Merchant</button></div>
+    <form class="register-form" id="merchantRegistrationForm" data-channel="${channel}" onsubmit="saveRegisteredMerchant(event)">
+      <div class="register-block"><h3>1. Identitas merchant</h3><p>Field bertanda * wajib diisi.</p><div class="register-grid">
+        ${registerField('regName','Nama merchant','text',true,'Nama toko / brand')}
+        ${registerField('regAccount','Nomor rekening','text',true,'Nomor rekening settlement')}
+        ${registerField('regOwner','Nama pemilik','text',false,'Opsional')}
+        ${registerField('regPhone','Nomor telepon','tel',false,'Opsional')}
+        ${registerField('regBranch','Cabang','text',false,'Jakarta Falatehan')}
+        ${registerField('regCity','Kota / Kabupaten','text',false,'Contoh: Kota Jakarta Selatan')}
+        <div class="register-field full"><label for="regAddress">Alamat</label><textarea id="regAddress" placeholder="Alamat merchant"></textarea></div>
+      </div></div>
+      ${registrationSpecificFields(channel)}
+      <div class="register-error" id="registrationError" role="alert"></div>
+      <div class="register-actions"><button class="register-save" type="submit">Simpan merchant</button><button class="register-cancel" type="button" onclick="closeDrawer()">Batal</button><span class="potential-status" id="registrationStatus"></span></div>
+    </form>`;
+  document.getElementById('drawerBackdrop').classList.add('open');document.getElementById('quickMenu')?.classList.remove('open');document.getElementById('regName')?.focus();
+}
+function registrationValue(id){return document.getElementById(id)?.value.trim()||''}
+function registrationNumber(id){const n=Number(registrationValue(id));return Number.isFinite(n)&&n>=0?n:0}
+async function saveRegisteredMerchant(event){
+  event.preventDefault();const form=event.currentTarget,channel=form.dataset.channel,name=registrationValue('regName'),account=registrationValue('regAccount'),sv=registrationNumber('regSvCurrent'),avbal=registrationNumber('regAvbalCurrent'),error=document.getElementById('registrationError');
+  const fail=message=>{error.textContent=message;error.classList.add('show')};error.classList.remove('show');
+  if(!name||!account)return fail('Nama merchant dan nomor rekening wajib diisi.');
+  if(sv<=0)return fail('Sales volume YTD harus lebih dari 0.');
+  if((channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS).some(x=>String(x.account)===account))return fail('Nomor rekening sudah terdaftar pada kanal ini.');
+  const now=Date.now(),owner=registrationValue('regOwner'),phone=registrationValue('regPhone'),branch=registrationValue('regBranch')||'Jakarta Falatehan',city=registrationValue('regCity'),address=registrationValue('regAddress');let row,key;
+  if(channel==='EDC'){
+    const mid=registrationValue('regMid'),edcCount=Math.max(1,Math.round(registrationNumber('regEdcCount'))),svPrevious=registrationNumber('regSvPrevious');if(!mid||avbal<=0)return fail('MID, jumlah mesin EDC, dan AVBAL aktual wajib diisi.');
+    key='NEW-EDC-'+now;row={id:key,account,branch_code:'12600',branch_name:branch,match_method:'manual_registration',merchant_name:name,official_names:[name],dba_names:[name],owner_name:owner,owner_phone:phone,address,kabupaten:city,mids:[{source_row:0,mid,edc:edcCount,dba:name,official:name,trx25:0,trx26:0,sv25:svPrevious,sv26:sv,sv_growth:sv-svPrevious}],totals:{edc:edcCount,trx25:0,trx26:0,sv25:svPrevious,sv26:sv},funding:{source_row:0,source_account:account,sname:name,dba:name,avbal_oct26:avbal},registered_at:new Date().toISOString()};
+  }else{
+    const previous=registrationNumber('regAvbalPrevious');if(previous<=0||avbal<=0)return fail('AVBAL tahun lalu dan AVBAL saat ini harus lebih dari 0.');const growth=avbal-previous,pctGrowth=growth/previous*100;
+    key='NEW-LM-'+now;row={key,store_name:name,store_code:key.toLowerCase(),account,owner_name:owner,owner_phone:phone,createddate:new Date().toISOString(),address,kabupaten:city,branch_final:'12600',branch_name:branch,area:'',region:'',lob:registrationValue('regLob')||'Merchant',mid_static:registrationValue('regMidStatic'),mid_dynamic:registrationValue('regMidDynamic'),companytype:'PERORANGAN',status_trx:'NEW',status_rekening:'ACTIVE',sv_ytd:sv,growth_avgbal_rekening_yoy:growth,pct_growth_avgbal_rekening_yoy:pctGrowth,registered_at:new Date().toISOString()};
+  }
+  const saved=registeredMerchantStore();if(channel==='EDC')saved.edc=[...(saved.edc||[]),row];else saved.livin=[...(saved.livin||[]),row];await MerchantDB.write(REGISTERED_MERCHANTS_KEY,saved);
+  if(channel==='EDC')EDC_RELATIONSHIPS.push(row);else LIVIN_MERCHANTS.push(row);refreshPortfolioSummary();addAudit('merchant_registration',`${channel} merchant didaftarkan`,channel,key);document.getElementById('registrationStatus').textContent='Merchant tersimpan.';
+  openWorkspace(channel);openDetail(channel,key);
+}
+
 // ----- Database & portable backup -----
 function databaseCounts(){
+  const registered=registeredMerchantStore();
   return {
+    registered:(registered.edc||[]).length+(registered.livin||[]).length,
     potential:Object.keys(readPotentialStore()).length,
     evidence:Object.keys(readStore(FAIR_EVIDENCE_KEY,{})).length,
     actions:readStore(FAIR_ACTION_KEY,[]).length,
@@ -1541,7 +1620,7 @@ function openDataCenter(){
   const c=databaseCounts(),drawer=document.getElementById('detailDrawer');
   drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Penyimpanan aplikasi</div><h2>Database & Backup</h2><p>Kelola data input tanpa mengubah data sumber merchant.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div>
     <div class="detail-section data-center">
-      <div class="data-card"><div class="db-status">IndexedDB terhubung</div><h3 style="margin-top:10px">Data tersimpan di browser ini</h3><p>Potensi merchant: <b>${idFmt.format(c.potential)}</b> · Evidence: <b>${idFmt.format(c.evidence)}</b> · Tindakan: <b>${idFmt.format(c.actions)}</b> · Audit: <b>${idFmt.format(c.audit)}</b>.</p></div>
+      <div class="data-card"><div class="db-status">IndexedDB terhubung</div><h3 style="margin-top:10px">Data tersimpan di browser ini</h3><p>Merchant baru: <b>${idFmt.format(c.registered)}</b> · Potensi: <b>${idFmt.format(c.potential)}</b> · Evidence: <b>${idFmt.format(c.evidence)}</b> · Tindakan: <b>${idFmt.format(c.actions)}</b> · Audit: <b>${idFmt.format(c.audit)}</b>.</p></div>
       <div class="data-card"><h3>Backup data</h3><p>Unduh seluruh input, evidence, action log, dan audit trail sebagai satu file JSON.</p><div class="data-actions"><button type="button" onclick="exportDatabaseBackup()">Unduh backup</button></div></div>
       <div class="data-card"><h3>Pulihkan data</h3><p>Pilih file backup dari aplikasi ini. Data di dalam file akan digabungkan ke database browser.</p><div class="data-actions"><label class="file-import-label">Pilih file backup<input type="file" accept="application/json,.json" onchange="importDatabaseBackup(this.files[0])"></label><span id="databaseStatus" class="potential-status"></span></div></div>
       <div class="data-note"><b>Catatan deploy:</b> GitHub/Netlify tetap menyajikan aplikasi statis. IndexedDB menyimpan input per browser dan tidak ikut terhapus saat website diperbarui. Untuk akses lintas perangkat dan multi-user, tahap produksi memerlukan backend berautentikasi/SSO.</div>
@@ -1569,6 +1648,7 @@ showHome=function(){if(!currentUser)return;document.getElementById('fairnessView
 jedaPrioritas();
 ['homeView','workspaceView','fairnessView'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
 document.getElementById('loginView').classList.remove('hidden');
+MerchantDB.ready.then(loadRegisteredMerchants);
 </script>
 
 </body>
