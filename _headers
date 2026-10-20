@@ -1,0 +1,10 @@
+/
+  Cache-Control: no-store, max-age=0
+/index.html
+  Cache-Control: no-store, max-age=0
+/database.js
+  Cache-Control: no-store, max-age=0
+/shared-database.js
+  Cache-Control: no-store, max-age=0
+/canonical.js
+  Cache-Control: no-store, max-age=0

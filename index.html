@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Retensi Merchant Mandiri · Performance Merchant</title>
+<script src="canonical.js?v=central2"></script>
 <style>
 .report-period-control{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:8px;font-weight:800;color:#395b72}.report-period-control input{padding:8px;border:1px solid #dce6ed;border-radius:8px;background:#fff;color:#173f5a;font:inherit}.report-period-control button{padding:8px 10px;border:0;border-radius:8px;background:#07558f;color:#fff;font:inherit;cursor:pointer}.workspace-header .report-period-control{flex-shrink:0}.metric-potential>b:last-child{font-size:9px}
 :root{
@@ -995,6 +996,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 </style>
 </head>
 <body>
+<div id="sharedConnectionStatus" style="position:fixed;bottom:10px;left:10px;z-index:9000;max-width:calc(100vw - 20px);background:#fff;border:1px solid #dce6ed;border-radius:9px;padding:8px 10px;font-size:11px;box-shadow:0 3px 12px #1233" role="status">Menghubungkan database…</div>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
 <div class="stage">
   <div class="app-shell">
@@ -1130,8 +1132,8 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
   <aside class="detail-drawer" id="detailDrawer"></aside>
 </div>
 
-<script src="database.js"></script>
-<script src="shared-database.js"></script>
+<script src="database.js?v=central2"></script>
+<script src="shared-database.js?v=central2"></script>
 <script>
 let xlsxLoadPromise=null;
 function ensureXlsx(){
@@ -1798,7 +1800,7 @@ function openDataCenter(){
       <div class="data-card"><div class="db-status">${MerchantDB.status()==='shared'?'Database pusat terhubung':'Database browser'}</div><h3 style="margin-top:10px">${MerchantDB.status()==='shared'?'Data bersama seluruh pengguna':'Data tersimpan di browser ini'}</h3><p>Data Excel aktif: <b>${idFmt.format(c.imported)}</b> · Potensi: <b>${idFmt.format(c.potential)}</b> · Evidence: <b>${idFmt.format(c.evidence)}</b> · Tindakan: <b>${idFmt.format(c.actions)}</b> · Audit: <b>${idFmt.format(c.audit)}</b>.</p></div>
       <div class="data-card"><h3>Upload data performance Excel</h3><p>Pilih kanal, periksa preview, lalu gunakan file sebagai sumber dashboard.</p><div class="data-actions"><button type="button" onclick="openPerformanceImport('EDC')">Upload Merchant EDC</button><button type="button" onclick="openPerformanceImport('LIVIN')">Upload Livin' Merchant</button></div></div>
       <div class="data-card"><h3>Ekspor tabel Excel</h3><p>Lihat dan periksa isi tabel terlebih dahulu. Data potensi, evidence, tindakan terakhir, retensi, dan gap digabungkan per merchant.</p><div class="data-actions"><button type="button" onclick="openExcelPreview()">Preview data Excel</button><button type="button" class="file-import-label" onclick="exportDatabaseBackup()">Backup teknis (.json)</button><button type="button" onclick="exportDatabaseBackup(true)">Backup data browser lama</button></div></div>
-      <div class="data-card"><h3>Pulihkan database</h3><p>Pemulihan menggunakan file JSON agar struktur data aplikasi tetap utuh. File Excel digunakan untuk laporan dan analisis.</p><div class="data-actions"><label class="file-import-label">Pilih backup JSON<input type="file" accept="application/json,.json" onchange="importDatabaseBackup(this.files[0])"></label><span id="databaseStatus" class="potential-status"></span></div></div>
+      <div class="data-card"><h3>Pulihkan database</h3><div class="data-actions"><button type="button" onclick="migrateBrowserData()">Pindahkan data browser ini ke pusat</button></div><p>Gunakan tombol ini satu kali dari browser yang memiliki data lama, dengan role RM / Sales. Data lokal asli tetap tersedia sebagai backup.</p><p>Pemulihan menggunakan file JSON agar struktur data aplikasi tetap utuh. File Excel digunakan untuk laporan dan analisis.</p><div class="data-actions"><label class="file-import-label">Pilih backup JSON<input type="file" accept="application/json,.json" onchange="importDatabaseBackup(this.files[0])"></label><span id="databaseStatus" class="potential-status"></span></div></div>
       <div class="data-note"><b>Catatan deploy:</b> Website Cloudflare menggunakan database pusat D1. Data Excel, periode, dan potensi dibagikan ke seluruh pengguna. Pembaruan diperiksa setiap 5 detik. Mode prototype publik menggunakan role demo.</div>
     </div>`;
   document.getElementById('drawerBackdrop').classList.add('open');
@@ -1871,6 +1873,12 @@ showHome=function(){if(!currentUser)return;_showHomeV2();renderHome();renderSess
 jedaPrioritas();
 ['homeView','workspaceView','fairnessView'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
 document.getElementById('loginView').classList.remove('hidden');
+document.addEventListener('merchantdb:connection',event=>{
+  const el=document.getElementById('sharedConnectionStatus'),data=event.detail;
+  el.style.color=data.online?'#17664d':'#a33229';
+  el.textContent=data.online?'● Database pusat online · '+new Date().toLocaleTimeString('id-ID'):'● Database pusat offline · data belum tersinkron';
+});
+async function migrateBrowserData(){try{await MerchantDB.migrateLocalData();closeDrawer();loadRegisteredMerchants();showToast('Data browser lama sudah dipindahkan ke database pusat. Pengguna lain akan menerima data yang sama.','success','Migrasi berhasil')}catch(error){showToast(error.message,'error','Data belum dipindahkan')}}
 document.addEventListener('merchantdb:sync',()=>{
   const card=document.getElementById('potentialCard'),channel=card?.dataset.channel,key=card?.dataset.key,dirty=card?.dataset.dirty==='true',changed=card&&card.dataset.loadedValue!==JSON.stringify(getPotentialData(channel,key));
   EDC_RELATIONSHIPS.length=0;LIVIN_MERCHANTS.length=0;loadRegisteredMerchants();
