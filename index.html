@@ -902,6 +902,27 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 }
 @media(orientation:landscape) and (max-height:560px) and (max-width:1000px){.login-visual{display:none}.login-view{grid-template-columns:1fr}.login-panel{min-height:100dvh}.workspace-head{padding-block:8px}.list-area{min-height:calc(100dvh - 145px)}}
 
+/* Conventional home dashboard */
+.dashboard-home{height:100%;background:#f3f7fa;display:grid;grid-template-rows:76px minmax(0,1fr);overflow:hidden;color:#18384f}
+.dashboard-home.hidden{display:none}
+.dashboard-header{display:flex;align-items:center;gap:26px;padding:0 30px;background:#fff;border-bottom:1px solid #dfe8ef;position:relative;z-index:5}
+.dashboard-header .brand-lockup{position:static;display:flex;align-items:center;gap:12px;min-width:255px}.dashboard-header .brand-mark{width:42px;height:42px;border-radius:13px;font-size:16px}.dashboard-header .brand-text b{font-size:14px}.dashboard-header .brand-text span{font-size:8px}
+.dashboard-nav{display:flex;align-items:center;gap:4px;margin-right:auto}.dashboard-nav button{border:0;background:transparent;color:#607687;padding:10px 11px;border-radius:10px;font-size:8.5px;font-weight:850;cursor:pointer}.dashboard-nav button:hover,.dashboard-nav button.active{background:#eaf3f9;color:var(--navy)}
+.dashboard-account{display:flex;align-items:center;gap:9px;position:relative}.dashboard-account .icon-btn{position:static;width:40px;height:40px}.dashboard-account .quick-menu{top:48px;right:0}
+.dashboard-main{overflow:auto;padding:22px 26px 28px;display:flex;flex-direction:column;gap:16px}
+.dashboard-welcome{position:static;transform:none;left:auto;top:auto;width:auto;pointer-events:auto;background:linear-gradient(120deg,#063e75,#075a98);border-radius:20px;padding:22px 25px;display:flex;align-items:center;justify-content:space-between;gap:24px;color:#fff;box-shadow:0 10px 28px rgba(0,61,121,.11)}
+.dashboard-home#homeView .dashboard-welcome{position:static;inset:auto;transform:none;width:100%!important;max-width:none;text-align:left;padding:22px 25px;background:linear-gradient(120deg,#063e75,#075a98);border:0;box-shadow:0 10px 28px rgba(0,61,121,.11);box-sizing:border-box}
+.dashboard-home#homeView .dashboard-welcome>div{min-width:0;flex:1}
+.dashboard-welcome .eyebrow{display:block;color:#bcdcf0;font-size:7.5px;letter-spacing:.12em;margin-bottom:7px}.dashboard-welcome h1{margin:0;color:#fff;font-size:25px;line-height:1.15;letter-spacing:-.025em}.dashboard-welcome p{width:auto;margin:8px 0 0;color:#d9eaf5;font-size:9px;line-height:1.5}.dashboard-welcome .left-tone{color:#fff}.dashboard-primary{border:0;border-radius:12px;background:#ffbd1b;color:#063e75;padding:12px 16px;font-size:8.5px;font-weight:950;white-space:nowrap;cursor:pointer}
+.dashboard-home#homeView .dashboard-welcome h1{margin:0;color:#fff;font-size:25px;line-height:1.15;letter-spacing:-.025em}.dashboard-home#homeView .dashboard-welcome p{width:auto;margin:8px 0 0;color:#d9eaf5;font-size:9px;line-height:1.5;text-shadow:none}.dashboard-home#homeView .dashboard-welcome p .left-tone{color:#fff}
+.dashboard-kpis,.dashboard-kpis>div{display:contents}.dashboard-kpi{background:#fff;border:1px solid #dfe8ef;border-radius:16px;padding:15px 16px;min-width:0}.dashboard-kpi small{display:block;color:#758894;font-size:7.5px;margin-bottom:7px}.dashboard-kpi b{display:block;color:var(--navy);font-size:21px;line-height:1}.dashboard-kpi span{display:block;color:#8a98a2;font-size:7.5px;margin-top:7px}.dashboard-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.dashboard-content{display:grid;grid-template-columns:minmax(250px,.72fr) minmax(480px,1.6fr);gap:16px;min-height:0}.dashboard-panel{background:#fff;border:1px solid #dfe8ef;border-radius:18px;padding:18px}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.panel-heading span{display:block;color:#8796a0;font-size:7px;font-weight:900;letter-spacing:.11em}.panel-heading h2{margin:4px 0 0;color:var(--navy);font-size:14px}.panel-heading>button{border:0;background:#eaf3f9;color:#0b5e98;border-radius:9px;padding:8px 10px;font-size:7.5px;font-weight:900;cursor:pointer}
+.channel-panel{display:flex;flex-direction:column}.channel-row{width:100%;display:grid;grid-template-columns:38px 1fr 20px;align-items:center;gap:11px;border:1px solid #e2e9ee;background:#f9fbfc;border-radius:14px;padding:12px;text-align:left;color:#29495e;margin-top:9px;cursor:pointer}.channel-row:hover{border-color:#a8cce2;background:#f5faff}.channel-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#dcedf8;color:#0968a4;font-size:13px;font-weight:950}.channel-row.livin .channel-icon{background:#fff1c9;color:#8d6500}.channel-row b{display:block;font-size:10px;color:var(--navy)}.channel-row small{display:block;margin-top:3px;font-size:7.5px;color:#7d8d98}.channel-row em{font-style:normal;font-size:22px;color:#0a6099;text-align:center}.secondary-link{margin-top:auto;padding-top:18px;border:0;background:transparent;color:#4e7188;font-size:8px;font-weight:850;text-align:left;cursor:pointer}
+.priority-list{display:grid;gap:8px}.priority-item{display:grid;grid-template-columns:minmax(130px,1.5fr) minmax(80px,.7fr) minmax(80px,.7fr) 78px 30px;align-items:center;gap:12px;padding:10px 11px;border:1px solid #e6ebef;border-radius:12px;background:#fbfcfd}.priority-name{min-width:0}.priority-name b{display:block;color:#174972;font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.priority-name span,.priority-metric small{display:block;color:#82919b;font-size:7px;margin-top:3px}.priority-metric b{display:block;color:#27475b;font-size:9px;margin-top:3px}.priority-score{display:flex;align-items:center;gap:5px;color:#614bd1;font-size:11px;font-weight:950}.priority-score:before{content:"";width:7px;height:7px;border-radius:99px;background:#6650d8}.priority-open{width:30px;height:30px;border:0;border-radius:9px;background:#eaf3f9;color:#07568f;font-size:16px;font-weight:900;cursor:pointer}.priority-panel .feature-dots{display:none}
+@media(max-width:1100px){.dashboard-header{padding-inline:20px;gap:16px}.dashboard-nav button:nth-child(4){display:none}.dashboard-content{grid-template-columns:1fr 1.6fr}.priority-item{grid-template-columns:minmax(120px,1.4fr) 80px 70px 30px}.priority-item .priority-gap{display:none}}
+@media(max-width:820px){.dashboard-home{min-height:100dvh;height:auto;grid-template-rows:auto 1fr}.dashboard-header{min-height:68px;padding:10px 16px}.dashboard-header .brand-lockup{min-width:0;margin-right:auto}.dashboard-header .brand-text span,.dashboard-nav,.dashboard-account .session-mini{display:none}.dashboard-main{padding:16px}.dashboard-welcome{padding:19px}.dashboard-kpis{grid-template-columns:1fr 1fr}.dashboard-content{grid-template-columns:1fr}.secondary-link{margin-top:15px}.priority-item{grid-template-columns:minmax(120px,1.4fr) 80px 70px 30px}}
+@media(max-width:520px){.dashboard-main{padding:12px;gap:12px}.dashboard-header .brand-mark{width:38px;height:38px}.dashboard-welcome{display:block;border-radius:16px}.dashboard-home#homeView .dashboard-welcome h1{font-size:21px}.dashboard-home#homeView .dashboard-welcome p{font-size:8.5px}.dashboard-primary{width:100%;margin-top:14px}.dashboard-kpis{gap:8px}.dashboard-kpi{padding:13px}.dashboard-kpi b{font-size:17px}.dashboard-panel{padding:14px;border-radius:16px}.priority-item{grid-template-columns:minmax(0,1fr) 70px 30px}.priority-item .priority-gap,.priority-score{display:none}}
+
 </style>
 </head>
 <body>
@@ -942,24 +963,19 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
         </div>
       </div>
     </section>
-    <section class="split-home hidden" id="homeView">
-      <div class="home-side home-left">
+    <section class="dashboard-home hidden" id="homeView">
+      <header class="dashboard-header">
         <div class="brand-lockup">
           <div class="brand-mark">M</div>
           <div class="brand-text"><b>Retensi Merchant</b><span>Bank Mandiri · KC Jakarta Falatehan · 12600</span></div>
         </div>
-        <div class="channel-kicker" aria-label="EDC · AVBAL Aktual"><span class="kdot"></span><span>EDC · AVBAL Aktual</span></div>
-        <div class="left-summary" id="homeEdcSummary"></div>
-        <nav class="home-menu">
+        <nav class="dashboard-nav">
           <button class="active" onclick="showHome()">Dasbor</button>
           <button onclick="openWorkspace('EDC')">Merchant EDC</button>
           <button onclick="openWorkspace('LIVIN')">Livin' Merchant</button>
           <button onclick="openFairnessCenter()">Multifaktor & Bias</button>
-          <button onclick="openMethodology()">Metodologi & Data</button>
         </nav>
-      </div>
-      <div class="home-side home-right">
-        <div class="home-top-right">
+        <div class="dashboard-account">
           <div id="homeSessionMini"></div>
           <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
           <div class="quick-menu" id="quickMenu">
@@ -973,22 +989,30 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
             <button onclick="logoutPrototype()">Keluar</button>
           </div>
         </div>
-        <div class="channel-kicker" aria-label="Livin' Merchant · Estimasi AVBAL YoY"><span class="kdot"></span><span>Livin' Merchant · Estimasi AVBAL YoY</span></div>
-        <div class="right-summary" id="homeLivinSummary"></div>
-      </div>
-
-      <div class="hero-copy">
-        <span class="eyebrow">Target retensi akhir · 20%</span>
-        <h1>Pertahankan lebih banyak<br/>dana transaksi merchant.</h1>
-        <p><span class="left-tone">EDC menggunakan AVBAL aktual.</span> Livin' Merchant menggunakan Growth AVBAL Rekening YoY dan % Pertumbuhan YoY untuk menghitung estimasi AVBAL saat ini, retensi, dan gap pendanaan menuju target akhir 20%.</p>
-        <div class="hero-actions">
-          <button class="edc-action" onclick="openWorkspace('EDC')">Buka EDC</button>
-          <button class="livin-action" onclick="openWorkspace('LIVIN')">Buka Livin' Merchant</button>
-        </div>
-      </div>
-
-      <div class="feature-card" id="featureCard"></div>
-      <div class="feature-dots" id="featureDots"></div>
+      </header>
+      <main class="dashboard-main">
+        <section class="dashboard-welcome hero-copy">
+          <div><span class="eyebrow">Ringkasan portofolio</span><h1>Kendalikan prioritas merchant.</h1><p><span class="left-tone">Pantau EDC dan Livin' Merchant</span> dalam satu tampilan yang ringkas dan mudah dibaca.</p></div>
+          <button class="dashboard-primary" onclick="openMerchantRegistration()">+ Daftarkan merchant</button>
+        </section>
+        <section class="dashboard-kpis" aria-label="Ringkasan utama">
+          <div id="homeEdcSummary"></div>
+          <div id="homeLivinSummary"></div>
+        </section>
+        <section class="dashboard-content">
+          <div class="dashboard-panel channel-panel">
+            <div class="panel-heading"><div><span>AKSES CEPAT</span><h2>Kanal merchant</h2></div></div>
+            <button class="channel-row edc" onclick="openWorkspace('EDC')"><span class="channel-icon">E</span><span><b>Merchant EDC</b><small>AVBAL aktual · pantau retensi dan gap</small></span><em>›</em></button>
+            <button class="channel-row livin" onclick="openWorkspace('LIVIN')"><span class="channel-icon">L</span><span><b>Livin' Merchant</b><small>Estimasi AVBAL YoY · lihat prioritas</small></span><em>›</em></button>
+            <button class="secondary-link" onclick="openDataCenter()">Database & backup data</button>
+          </div>
+          <div class="dashboard-panel priority-panel">
+            <div class="panel-heading"><div><span>PERLU DITINDAKLANJUTI</span><h2>Prioritas merchant</h2></div><button onclick="openWorkspace('LIVIN')">Lihat semua</button></div>
+            <div class="priority-list" id="featureCard"></div>
+            <div class="feature-dots" id="featureDots"></div>
+          </div>
+        </section>
+      </main>
 
       <div class="summary-popup-backdrop" id="summaryPopupBackdrop" onclick="summaryPopupBackdropClose(event)" aria-hidden="true">
         <section class="summary-popup" id="summaryPopup" role="dialog" aria-modal="false" aria-labelledby="summaryPopupTitle">
@@ -1561,6 +1585,10 @@ const _renderPriorityV2=renderPriority;
 renderPriority=function(){_renderPriorityV2();const rows=topLivinPriorities(),o=rows[priorityIndex],card=document.getElementById('featureCard');if(!o||!card)return;const sm=card.querySelector('.feature-visual small');if(sm)sm.textContent='Prioritas multifaktor';const top=card.querySelector('.feature-copy .topline');if(top)top.innerHTML=`<span>${esc(o.fair.label)}</span><span>Score ${o.fair.score} · C${o.fair.confidence}%</span>`;const p=card.querySelector('.feature-copy p');if(p)p.insertAdjacentHTML('beforeend',`<br/><span style="color:#6b648c">Skor tidak memakai identitas user / owner.</span>`)};
 const _renderHomeV2=renderHome;
 renderHome=function(){_renderHomeV2();if(currentUser)applyRoleUI()};
+
+// Compact dashboard renderer: one glance for KPIs, channels, and priority work.
+renderPriority=function(){const card=document.getElementById('featureCard'),rows=topLivinPriorities();if(!card)return;card.innerHTML=rows.map(o=>`<div class="priority-item"><div class="priority-name"><b>${esc(o.l.store_name)}</b><span>${esc(o.l.lob||'Merchant')} · ${esc(o.l.kabupaten||o.l.branch_name||'')}</span></div><div class="priority-metric"><small>Retensi</small><b>${pct(o.x.ratio)}</b></div><div class="priority-metric priority-gap"><small>Gap ke 20%</small><b>${compact(o.x.gap)}</b></div><div class="priority-score" title="Confidence ${o.fair.confidence}%">${o.fair.score}</div><button class="priority-open" onclick="openDetail('LIVIN','${o.l.key}')" aria-label="Buka detail ${esc(o.l.store_name)}">›</button></div>`).join('')||'<div class="empty-state">Belum ada prioritas merchant.</div>';document.getElementById('featureDots').innerHTML=''};
+renderHome=function(){E_SUM=summarizeEdc();L_SUM=summarizeLivin();document.getElementById('homeEdcSummary').innerHTML=`<article class="dashboard-kpi"><small>Total merchant EDC</small><b>${idFmt.format(E_SUM.count)}</b><span>${idFmt.format(E_SUM.mapped)} memiliki AVBAL aktual</span></article><article class="dashboard-kpi"><small>Gap pendanaan EDC</small><b>${compact(E_SUM.gap)}</b><span>${idFmt.format(E_SUM.achieved)} sudah mencapai ≥20%</span></article>`;document.getElementById('homeLivinSummary').innerHTML=`<article class="dashboard-kpi"><small>Total Livin' Merchant</small><b>${idFmt.format(L_SUM.count)}</b><span>${idFmt.format(L_SUM.mapped)} estimasi tersedia</span></article><article class="dashboard-kpi"><small>Gap pendanaan Livin'</small><b>${compact(L_SUM.gap)}</b><span>${idFmt.format(L_SUM.achieved)} sudah mencapai ≥20%</span></article>`;renderPriority();if(currentUser)applyRoleUI()};
 
 // ----- Detail evidence, action log, and role-controlled input -----
 function scoreCardHtml(ch,raw){const sc=fairScore(ch,raw);const map=[['gap','Funding gap'],['sv','Skala SV'],['retentionNeed','Retention need'],['growth','Momentum'],['potential','Potensi'],['readiness','Readiness']];return `<div class="score-card"><div class="score-card-head"><div><h3>Explainable Multifactor Score</h3><p>Faktor yang tidak tersedia tidak diberi nilai 0; bobot faktor yang tersedia dinormalisasi ulang. Confidence ditampilkan terpisah.</p></div><div class="score-badge"><b>${sc.score??'—'}</b><span>${esc(sc.label)}</span></div></div><div class="score-factors">${map.map(([k,label])=>{const v=scoreFactorValue(sc,k);return `<div class="score-factor"><small>${label}</small><b>${v===null?'Tidak tersedia':v+'/100'}</b></div>`}).join('')}</div><div class="confidence-row"><span>Confidence ${sc.confidence}% · ${sc.availableWeight}% bobot tersedia</span><span>Source reliability dipisahkan dari skor</span></div><div class="confidence-track"><span style="width:${sc.confidence}%"></span></div>${sc.override&&sc.override!=='none'?`<div class="override-note"><b>Manual override: ${esc(sc.override)}</b><br/>${esc(sc.overrideReason||'Tanpa alasan')}</div>`:''}</div>`}
