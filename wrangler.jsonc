@@ -1,0 +1,14 @@
+{
+  "name": "retensi-merchant",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-10-20",
+  "vars": { "PUBLIC_PROTOTYPE": "true" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "retensi-merchant",
+      "database_id": "8992a1a2-7b04-4de9-9ed2-1f47c3f1eb3b",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

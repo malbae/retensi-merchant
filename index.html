@@ -1131,6 +1131,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 </div>
 
 <script src="database.js"></script>
+<script src="shared-database.js"></script>
 <script>
 let xlsxLoadPromise=null;
 function ensureXlsx(){
@@ -1243,7 +1244,7 @@ function numInput(v){const n=Number(v);return Number.isFinite(n)&&n>=0?n:0}
 function potentialSection(channel,key){
   const d=getPotentialData(channel,key),basis=d.basis==='real'?'real':'assumption';
   return `<div class="potential-card" id="potentialCard" data-channel="${esc(channel)}" data-key="${esc(key)}">
-    <div class="potential-head"><div><h3>Input & Hasil Potensi Merchant</h3><p>Isi data dasar, periksa hasil hitung otomatis, lalu simpan. Semua input merchant tersimpan di database browser.</p></div><div class="potential-badge">Database aktif</div></div>
+    <div class="potential-head"><div><h3>Input & Hasil Potensi Merchant</h3><p>Isi data dasar, periksa hasil hitung otomatis, lalu simpan. Input yang disimpan pada Cloudflare tersinkron ke database bersama.</p></div><div class="potential-badge">Database aktif</div></div>
     <div class="potential-body">
       <div class="flow-steps"><span class="flow-step active"><i>1</i>Data dasar</span><span class="flow-arrow">→</span><span class="flow-step active"><i>2</i>Hasil otomatis</span><span class="flow-arrow">→</span><span class="flow-step"><i>3</i>Tindak lanjut</span></div>
       <section class="flow-section"><div class="flow-section-title"><i>1</i><div><b>Data dasar merchant</b><span>Pilih satu sumber omzet dan lengkapi data payroll bila tersedia.</span></div></div>
@@ -1281,6 +1282,9 @@ function potentialSection(channel,key){
 }
 function initPotentialForm(channel,key){
   const card=document.getElementById('potentialCard');if(!card)return;
+  card.dataset.loadedValue=JSON.stringify(getPotentialData(channel,key));
+  card.addEventListener('input',()=>card.dataset.dirty='true');
+  card.addEventListener('change',()=>card.dataset.dirty='true');
   const basisInputs=[...card.querySelectorAll('input[name="potentialBasis"]')];
   const ids=['potentialRealRevenue','potentialVisitors','potentialAvgTicket','potentialDays','potentialEmployees','potentialAvgSalary'];
   const inputs=ids.map(id=>document.getElementById(id)).filter(Boolean);
@@ -1311,7 +1315,7 @@ function initPotentialForm(channel,key){
     return {data:d,revenue,payroll,annual,share};
   }
   basisInputs.forEach(el=>el.addEventListener('change',switchGroups));inputs.forEach(el=>el.addEventListener('input',recalcPotential));
-  document.getElementById('potentialSave').addEventListener('click',async()=>{const r=recalcPotential(),button=document.getElementById('potentialSave');button.disabled=true;try{await savePotentialData(channel,key,r.data);showToast('Data potensi merchant sudah tersimpan di database browser.','success','Data tersimpan')}catch(error){showToast(error.message||'Data potensi gagal disimpan.','error')}finally{button.disabled=false}});
+  document.getElementById('potentialSave').addEventListener('click',async()=>{const r=recalcPotential(),button=document.getElementById('potentialSave');button.disabled=true;try{if(card.dataset.remoteChanged==='true')throw new Error('Data diubah pengguna lain. Buka ulang detail sebelum menyimpan.');await savePotentialData(channel,key,r.data);card.dataset.dirty='false';card.dataset.loadedValue=JSON.stringify(r.data);showToast('Data potensi merchant sudah tersimpan. Pada Cloudflare, perubahan dibagikan ke seluruh pengguna.','success','Data tersimpan')}catch(error){showToast(error.message||'Data potensi gagal disimpan.','error')}finally{button.disabled=false}});
   document.getElementById('potentialClear').addEventListener('click',async()=>{try{await clearPotentialData(channel,key);document.getElementById('potentialRealRevenue').value='';document.getElementById('potentialVisitors').value='';document.getElementById('potentialAvgTicket').value='';document.getElementById('potentialDays').value='30';document.getElementById('potentialEmployees').value='';document.getElementById('potentialAvgSalary').value='';card.querySelector('input[value="assumption"]').checked=true;switchGroups();showToast('Seluruh input potensi merchant telah dikosongkan.','success','Input direset')}catch(error){showToast(error.message||'Input tidak dapat direset.','error')}});
   switchGroups();
 }
@@ -1533,7 +1537,7 @@ const DATA_GUIDE_STEPS=[
 ];
 const DATA_GUIDE_END=[
   {title:'Reset data per kanal',text:'Buka EDC atau Livin’ Merchant lalu klik Reset data kanal. Baca konfirmasi, pilih Ya, kosongkan jika ingin menghapus performance kanal tersebut, atau Batal untuk mempertahankannya.',tip:'Kanal lain dan file Excel asli tetap tersedia. Kanal yang direset tetap kosong setelah refresh; upload ulang Excel untuk mengisinya kembali.'},
-  {title:'Laporan, backup, dan pindah perangkat',text:'Buka Database & backup data. Periksa Preview data Excel sebelum mengunduh laporan, atau unduh Backup teknis JSON. Gunakan Pulihkan database untuk mengembalikan backup JSON.',tip:'Data masih tersimpan per browser dan alamat website. Untuk berpindah dari GitHub Pages ke Cloudflare atau perangkat lain, ekspor JSON dari tempat lama lalu pulihkan di tempat baru. Panduan dapat dibuka lagi melalui Menu → Panduan role saya.'}
+  {title:'Laporan, backup, dan pindah perangkat',text:'Buka Database & backup data. Periksa Preview data Excel sebelum mengunduh laporan, atau unduh Backup teknis JSON. Gunakan Pulihkan database untuk mengembalikan backup JSON.',tip:'Di Cloudflare, data tersimpan di database pusat dan perubahan pengguna lain muncul otomatis. Data lokal lama dapat dipindahkan lewat backup JSON satu kali. Panduan dapat dibuka lagi melalui Menu → Panduan role saya.'}
 ];
 const ROLE_TUTORIALS={
   BM:[
@@ -1566,7 +1570,8 @@ function writeStore(key,val){if(key===FAIR_EVIDENCE_KEY)invalidateScores();retur
 function fairKey(ch,key){return ch+'::'+key}
 function fillDemo(role){const u=DEMO_USERS[role];document.getElementById('loginUsername').value=u.username;document.getElementById('loginPassword').value=u.password;document.getElementById('loginError').textContent=''}
 function animateView(el){if(!el)return;el.classList.remove('view-enter');void el.offsetWidth;el.classList.add('view-enter')}
-function loginPrototype(username,password){
+async function loginPrototype(username,password){
+  try{await MerchantDB.ready}catch(error){document.getElementById('loginError').textContent='Database pusat belum terhubung. Periksa koneksi lalu muat ulang halaman.';return false}
   const user=Object.values(DEMO_USERS).find(u=>u.username===username&&u.password===password);
   if(!user){document.getElementById('loginError').textContent='Username atau password demo tidak sesuai.';return false}
   currentUser={...user};
@@ -1738,7 +1743,7 @@ function processExcelInBackground(file,channel){
 }
 function requestChannelReset(channel){
   if(!currentUser||importSaving)return;channel=channel==='EDC'?'EDC':'LIVIN';const label=channel==='EDC'?'Merchant EDC':"Livin’ Merchant",drawer=document.getElementById('detailDrawer');
-  drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Reset data kanal</div><h2>Kosongkan ${label}?</h2><p>Data performance ${label} akan dikosongkan dari dashboard dan browser ini. Kanal lainnya tetap tersedia. File Excel asli tidak dihapus; Anda dapat mengupload ulang setelah reset.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="excel-confirm" style="margin-top:24px"><button class="primary" style="background:#b33f34" onclick="resetChannelData('${channel}',this)">Ya, kosongkan ${label}</button><button class="secondary" onclick="closeDrawer()">Batal</button></div>`;document.getElementById('drawerBackdrop').classList.add('open');
+  drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Reset data kanal</div><h2>Kosongkan ${label}?</h2><p>Data performance ${label} akan dikosongkan dari database aktif. Pada Cloudflare, reset ini berlaku untuk seluruh pengguna. Kanal lainnya tetap tersedia. File Excel asli tidak dihapus; Anda dapat mengupload ulang setelah reset.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="excel-confirm" style="margin-top:24px"><button class="primary" style="background:#b33f34" onclick="resetChannelData('${channel}',this)">Ya, kosongkan ${label}</button><button class="secondary" onclick="closeDrawer()">Batal</button></div>`;document.getElementById('drawerBackdrop').classList.add('open');
 }
 async function resetChannelData(channel,button){
   if(!currentUser||importSaving)return;importSaving=true;button.disabled=true;try{const key=channel==='EDC'?'edc':'livin',store=performanceImportStore(),registered=registeredMerchantStore();store[key]=[];store.meta[key]={resetAt:new Date().toISOString(),rows:0};registered[key]=[];await MerchantDB.write(PERFORMANCE_IMPORT_KEY,store);await MerchantDB.write(REGISTERED_MERCHANTS_KEY,registered);const rows=channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS;rows.length=0;pendingExcelImport=null;refreshPortfolioSummary();closeDrawer();renderHome();openWorkspace(channel);showToast('Data kanal dikosongkan. Silakan upload Excel untuk mengisi kembali.','success','Reset berhasil')}catch(error){showToast(error.message||'Data gagal dikosongkan.','error')}finally{importSaving=false;button.disabled=false}
@@ -1790,18 +1795,18 @@ function openDataCenter(){
   const c=databaseCounts(),drawer=document.getElementById('detailDrawer');
   drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Penyimpanan aplikasi</div><h2>Database & Backup</h2><p>Kelola data input tanpa mengubah data sumber merchant.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div>
     <div class="detail-section data-center">
-      <div class="data-card"><div class="db-status">IndexedDB terhubung</div><h3 style="margin-top:10px">Data tersimpan di browser ini</h3><p>Data Excel aktif: <b>${idFmt.format(c.imported)}</b> · Potensi: <b>${idFmt.format(c.potential)}</b> · Evidence: <b>${idFmt.format(c.evidence)}</b> · Tindakan: <b>${idFmt.format(c.actions)}</b> · Audit: <b>${idFmt.format(c.audit)}</b>.</p></div>
+      <div class="data-card"><div class="db-status">${MerchantDB.status()==='shared'?'Database pusat terhubung':'Database browser'}</div><h3 style="margin-top:10px">${MerchantDB.status()==='shared'?'Data bersama seluruh pengguna':'Data tersimpan di browser ini'}</h3><p>Data Excel aktif: <b>${idFmt.format(c.imported)}</b> · Potensi: <b>${idFmt.format(c.potential)}</b> · Evidence: <b>${idFmt.format(c.evidence)}</b> · Tindakan: <b>${idFmt.format(c.actions)}</b> · Audit: <b>${idFmt.format(c.audit)}</b>.</p></div>
       <div class="data-card"><h3>Upload data performance Excel</h3><p>Pilih kanal, periksa preview, lalu gunakan file sebagai sumber dashboard.</p><div class="data-actions"><button type="button" onclick="openPerformanceImport('EDC')">Upload Merchant EDC</button><button type="button" onclick="openPerformanceImport('LIVIN')">Upload Livin' Merchant</button></div></div>
-      <div class="data-card"><h3>Ekspor tabel Excel</h3><p>Lihat dan periksa isi tabel terlebih dahulu. Data potensi, evidence, tindakan terakhir, retensi, dan gap digabungkan per merchant.</p><div class="data-actions"><button type="button" onclick="openExcelPreview()">Preview data Excel</button><button type="button" class="file-import-label" onclick="exportDatabaseBackup()">Backup teknis (.json)</button></div></div>
+      <div class="data-card"><h3>Ekspor tabel Excel</h3><p>Lihat dan periksa isi tabel terlebih dahulu. Data potensi, evidence, tindakan terakhir, retensi, dan gap digabungkan per merchant.</p><div class="data-actions"><button type="button" onclick="openExcelPreview()">Preview data Excel</button><button type="button" class="file-import-label" onclick="exportDatabaseBackup()">Backup teknis (.json)</button><button type="button" onclick="exportDatabaseBackup(true)">Backup data browser lama</button></div></div>
       <div class="data-card"><h3>Pulihkan database</h3><p>Pemulihan menggunakan file JSON agar struktur data aplikasi tetap utuh. File Excel digunakan untuk laporan dan analisis.</p><div class="data-actions"><label class="file-import-label">Pilih backup JSON<input type="file" accept="application/json,.json" onchange="importDatabaseBackup(this.files[0])"></label><span id="databaseStatus" class="potential-status"></span></div></div>
-      <div class="data-note"><b>Catatan deploy:</b> GitHub Pages menyajikan aplikasi statis. IndexedDB menyimpan input per browser dan tidak ikut terhapus saat website diperbarui. Untuk akses lintas perangkat dan multi-user, tahap produksi memerlukan backend berautentikasi/SSO.</div>
+      <div class="data-note"><b>Catatan deploy:</b> Website Cloudflare menggunakan database pusat D1. Data Excel, periode, dan potensi dibagikan ke seluruh pengguna. Pembaruan diperiksa setiap 5 detik. Mode prototype publik menggunakan role demo.</div>
     </div>`;
   document.getElementById('drawerBackdrop').classList.add('open');
   document.getElementById('quickMenu')?.classList.remove('open');
   addAudit('view_database','Database & backup dibuka');
 }
-async function exportDatabaseBackup(){
-  try{const payload=await MerchantDB.exportAll(),blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+async function exportDatabaseBackup(localOnly=false){
+  try{const payload=await (localOnly&&MerchantDB.exportLocalBackup?MerchantDB.exportLocalBackup():MerchantDB.exportAll()),blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=`retensi-merchant-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);
   addAudit('database_export','Backup database dibuat');showToast('File backup teknis mulai diunduh.','success','Backup berhasil dibuat')}catch(error){showToast(error.message||'Backup database gagal dibuat.','error','Backup gagal')}
 }
@@ -1866,7 +1871,18 @@ showHome=function(){if(!currentUser)return;_showHomeV2();renderHome();renderSess
 jedaPrioritas();
 ['homeView','workspaceView','fairnessView'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
 document.getElementById('loginView').classList.remove('hidden');
-MerchantDB.ready.then(loadRegisteredMerchants);
+document.addEventListener('merchantdb:sync',()=>{
+  const card=document.getElementById('potentialCard'),channel=card?.dataset.channel,key=card?.dataset.key,dirty=card?.dataset.dirty==='true',changed=card&&card.dataset.loadedValue!==JSON.stringify(getPotentialData(channel,key));
+  EDC_RELATIONSHIPS.length=0;LIVIN_MERCHANTS.length=0;loadRegisteredMerchants();
+  if(card&&document.getElementById('drawerBackdrop').classList.contains('open')){
+    const exists=(channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS).some(row=>(channel==='EDC'?row.id:row.key)===key);
+    if(!exists){closeDrawer();showToast('Data merchant telah berubah di database pusat. Buka kembali merchant dari daftar.','info','Data diperbarui')}
+    else if(!dirty)openDetail(channel,key);
+    else if(changed){card.dataset.remoteChanged='true';showToast('Potensi merchant ini diubah pengguna lain. Buka ulang detail sebelum menyimpan.','info','Data bersama diperbarui')}
+  }
+});
+document.addEventListener('merchantdb:offline',()=>{if(typeof showToast==='function')showToast('Koneksi database pusat terputus. Penyimpanan memerlukan koneksi internet.','error','Sinkronisasi terhenti')});
+MerchantDB.ready.then(()=>{if(MerchantDB.status()==='shared'){EDC_RELATIONSHIPS.length=0;LIVIN_MERCHANTS.length=0}loadRegisteredMerchants()}).catch(()=>{document.getElementById('loginError').textContent='Database pusat belum tersedia. Muat ulang halaman setelah koneksi kembali.'});
 </script>
 
 </body>
