@@ -1519,34 +1519,40 @@ const DEMO_USERS={
   OPS:{username:'tim.operasional',password:'Ops#Mandiri26',role:'OPS',label:'Tim Operasional',name:'Operasional Falatehan'}
 };
 const ROLE_COPY={
-  BM:{headline:'Kendalikan prioritas secara konsisten.',copy:'Lihat portfolio lintas kanal, score explanation, confidence, outcome, serta manual override tanpa mengubah skor model.',permission:'Melihat seluruh portfolio, fairness, audit & outcome; memberi override beralasan; input komersial tetap read-only.'},
-  RM:{headline:'Fokus pada merchant yang paling layak ditindaklanjuti.',copy:'Gunakan skor multifaktor sebagai decision support, lengkapi potensi merchant dan catat outcome tindakan. Identitas RM tidak masuk skor.',permission:'Melihat portfolio & score; mengisi potensi; mencatat tindakan/evidence; tidak dapat mengubah bobot atau override.'},
-  OPS:{headline:'Jaga kualitas data dan kesiapan eksekusi.',copy:'Validasi sumber data dan operational readiness. Kesiapan hanya menjadi faktor kecil dan harus memiliki status verifikasi.',permission:'Melihat portfolio & score; mengisi verifikasi data/kesiapan operasional; data potensi komersial read-only.'}
+  BM:{headline:'Kendalikan prioritas secara konsisten.',copy:'Pantau performance EDC dan Livin’ dari Excel, tinjau gap pendanaan, potensi, skor, dan confidence untuk menentukan prioritas.',permission:'Melihat performance, profil, skor, dan laporan; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'},
+  RM:{headline:'Fokus pada merchant yang paling layak ditindaklanjuti.',copy:'Gunakan skor dan gap pendanaan untuk memilih prioritas, lalu lengkapi potensi cashflow serta payroll merchant.',permission:'Melihat performance dan skor; mengisi serta menyimpan potensi merchant. Dapat upload Excel dan reset data kanal.'},
+  OPS:{headline:'Jaga kualitas data performance.',copy:'Periksa file Excel, kelengkapan profil, Sales Volume, dan Average Balance sebelum data digunakan di dashboard.',permission:'Memeriksa performance, profil, dan skor; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'}
 };
+const DATA_GUIDE_STEPS=[
+  {title:'Upload Excel sesuai kanal',text:'Klik Upload data Excel di Dasbor atau Upload Excel di daftar merchant. Pilih Data Merchant EDC atau Data Livin’ Merchant, lalu pilih file laporan. Tidak perlu mendaftarkan merchant satu per satu.',tip:'EDC membaca Detail Merchant dan Detail Funding berdasarkan rekening. Livin’ membaca laporan akuisisi dan menghitung estimasi AVBAL dari YoY. Template sederhana juga tersedia.'},
+  {title:'Periksa preview sebelum memakai data',text:'Pembacaan Excel berjalan di latar belakang. Periksa jumlah baris valid, baris yang dilewati, dan contoh hasil konversi, lalu klik Gunakan data di dashboard. Popup akan memberi tahu hasilnya.',tip:'Upload dengan isi yang sama seperti data aktif ditolak, termasuk saat nama file diganti. Nilai yang kosong ditampilkan sebagai belum tersedia. Import mengganti data kanal yang dipilih.'}
+];
+const DATA_GUIDE_END=[
+  {title:'Reset data per kanal',text:'Buka EDC atau Livin’ Merchant lalu klik Reset data kanal. Baca konfirmasi, pilih Ya, kosongkan jika ingin menghapus performance kanal tersebut, atau Batal untuk mempertahankannya.',tip:'Kanal lain dan file Excel asli tetap tersedia. Kanal yang direset tetap kosong setelah refresh; upload ulang Excel untuk mengisinya kembali.'},
+  {title:'Laporan, backup, dan pindah perangkat',text:'Buka Database & backup data. Periksa Preview data Excel sebelum mengunduh laporan, atau unduh Backup teknis JSON. Gunakan Pulihkan database untuk mengembalikan backup JSON.',tip:'Data masih tersimpan per browser dan alamat website. Untuk berpindah dari GitHub Pages ke Cloudflare atau perangkat lain, ekspor JSON dari tempat lama lalu pulihkan di tempat baru. Panduan dapat dibuka lagi melalui Menu → Panduan role saya.'}
+];
 const ROLE_TUTORIALS={
   BM:[
-    {title:'Mulai dari Dasbor',text:'Baca ringkasan portfolio dan merchant prioritas tinggi. Gunakan Buka EDC atau Buka Livin’ Merchant untuk masuk ke daftar kanal.',tip:'Fokus Branch Manager adalah mengarahkan prioritas dan memantau hasil, bukan mengubah data komersial merchant.'},
-    {title:'Tinjau daftar merchant',text:'Gunakan pencarian, tahapan retensi, dan urutan skor untuk menemukan merchant yang perlu perhatian.',tip:'Skor membantu menentukan urutan review. Identitas user, owner, dan RM tidak dipakai sebagai faktor skor.'},
-    {title:'Periksa alasan skor',text:'Klik merchant untuk membaca gap pendanaan, faktor pembentuk skor, confidence, sumber data, evidence, dan riwayat tindakan.',tip:'Confidence rendah berarti data perlu dilengkapi sebelum keputusan dibuat.'},
-    {title:'Berikan override beralasan',text:'Pada detail merchant, pilih Manual override bila ada konteks bisnis yang belum tertangkap model. Isi alasan, lalu tekan Simpan evidence.',tip:'Override tidak mengubah skor asli dan wajib mempunyai alasan yang dapat diaudit.'},
-    {title:'Pantau fairness dan outcome',text:'Buka Multifaktor & Bias untuk melihat prioritas, kualitas data, override, efektivitas tindakan, dan Audit Trail.',tip:'Gunakan outcome terverifikasi sebagai dasar evaluasi, bukan sekadar jumlah call atau meeting.'},
-    {title:'Backup dan laporan',text:'Buka Menu → Database & backup. Preview seluruh data sebelum mengunduh Excel, atau buat backup teknis JSON untuk pemulihan.',tip:'Excel digunakan untuk laporan; JSON digunakan untuk memulihkan database aplikasi.'}
+    {title:'Dasbor Branch Manager',text:'Baca total merchant, gap pendanaan EDC, dan gap Livin’. Pilih tombol Merchant EDC atau Livin’ Merchant untuk meninjau portfolio kanal tersebut.',tip:'Gunakan ringkasan dan daftar prioritas sebagai dasar pengarahan tim.'},
+    ...DATA_GUIDE_STEPS,
+    {title:'Tentukan prioritas review',text:'Cari nama merchant, rekening, atau pemilik; gunakan filter tahapan retensi dan urutan skor, gap, atau Sales Volume sesuai kebutuhan.',tip:'Target akhir retensi 20%; angka 10% merupakan tahap pemantauan. Confidence menunjukkan kelengkapan dan keandalan data.'},
+    {title:'Tinjau detail dan potensi',text:'Klik panah detail untuk melihat SV YTD, AVBAL, retensi, gap, ID Merchant, Profil Merchant, Input & Hasil Potensi Merchant, dan Explainable Multifactor Score.',tip:'Branch Manager melihat potensi secara read-only. Pengisian cashflow dan payroll dilakukan oleh RM / Sales.'},
+    ...DATA_GUIDE_END
   ],
   RM:[
-    {title:'Mulai dari Dasbor',text:'Lihat merchant prioritas, kemudian pilih kanal EDC atau Livin’ Merchant sesuai portfolio yang akan ditindaklanjuti.',tip:'RM / Sales berfokus melengkapi potensi, evidence, tindakan, dan outcome merchant.'},
-    {title:'Cari merchant prioritas',text:'Gunakan pencarian dan filter tahapan retensi. Urutkan berdasarkan skor agar merchant dengan kebutuhan dan potensi tertinggi muncul lebih dulu.',tip:'Gunakan skor sebagai decision support, lalu tetap verifikasi kondisi merchant.'},
-    {title:'Pahami detail merchant',text:'Klik merchant untuk melihat gap, score explanation, confidence, dan data yang masih belum lengkap sebelum melakukan pendekatan.',tip:'EDC memakai AVBAL aktual, sedangkan Livin’ Merchant memakai estimasi.'},
-    {title:'Lengkapi potensi',text:'Isi estimasi omzet atau cashflow pada bagian Potensi Merchant bila tersedia, lalu simpan agar perhitungan potensi lebih lengkap.',tip:'Masukkan angka yang memiliki dasar dan tuliskan sumber informasinya.'},
-    {title:'Catat evidence dan tindakan',text:'Pilih Status evidence RM / Sales dan Simpan evidence. Gunakan + Catat tindakan untuk merekam aktivitas, outcome, dan gap closed.',tip:'Gap closed hanya dihitung sebagai hasil bisnis jika nilainya terverifikasi.'},
-    {title:'Upload data performance',text:'Pilih Upload data Excel, tentukan kanal EDC atau Livin’, lalu pilih file. Periksa preview dan validasi sebelum memakai data di dashboard.',tip:'File Excel menjadi sumber Nama Merchant, rekening, Sales Volume, Average Balance, serta kolom pendukung lainnya.'}
+    {title:'Dasbor RM / Sales',text:'Lihat ringkasan performance dan merchant prioritas, lalu pilih kanal Merchant EDC atau Livin’ Merchant yang akan ditindaklanjuti.',tip:'Gunakan pencarian, filter retensi, dan urutan skor untuk menemukan merchant yang tepat.'},
+    ...DATA_GUIDE_STEPS,
+    {title:'Pahami detail merchant',text:'Klik panah detail untuk membaca SV YTD, AVBAL, retensi, gap, ID Merchant, profil, potensi, dan faktor skor beserta confidence.',tip:'EDC memakai AVBAL aktual; Livin’ memakai estimasi AVBAL YoY. Nilai belum tersedia perlu diperiksa di sumber Excel.'},
+    {title:'Isi potensi cashflow dan payroll',text:'Pada Input & Hasil Potensi Merchant, pilih Omzet real atau Asumsi omzet. Untuk asumsi, isi pengunjung harian, harga rata-rata transaksi, dan hari operasional. Lengkapi jumlah karyawan serta gaji rata-rata bila tersedia.',tip:'Cashflow bulanan, payroll, proyeksi tahunan, dan porsi payroll dihitung otomatis saat input berubah.'},
+    {title:'Simpan atau reset input potensi',text:'Klik Simpan ke database dan tunggu popup Data tersimpan. Gunakan Reset input untuk mengosongkan input potensi merchant yang sedang dibuka.',tip:'Reset input potensi berbeda dari Reset data kanal: reset potensi hanya mengosongkan formulir merchant ini.'},
+    ...DATA_GUIDE_END
   ],
   OPS:[
-    {title:'Mulai dari Dasbor',text:'Lihat portfolio, lalu buka kanal EDC atau Livin’ Merchant yang akan diperiksa kualitas datanya.',tip:'Tim Operasional berfokus pada validasi data dan kesiapan eksekusi.'},
-    {title:'Temukan data yang perlu diperiksa',text:'Gunakan pencarian, filter, dan confidence untuk mendahulukan data yang belum lengkap atau perlu review.',tip:'Confidence rendah adalah sinyal kualitas atau kelengkapan data, bukan otomatis merchant buruk.'},
-    {title:'Buka detail merchant',text:'Klik merchant dan bandingkan sumber data, gap, faktor skor, serta evidence yang sudah dimasukkan role lain.',tip:'Data komersial dan manual override tampil read-only untuk Tim Operasional.'},
-    {title:'Verifikasi data operasional',text:'Pada panel Evidence & Kontrol, ubah Verifikasi data operasional menjadi Verified atau Perlu review sesuai hasil pengecekan.',tip:'Gunakan Perlu review jika sumber belum konsisten atau masih membutuhkan konfirmasi.'},
-    {title:'Nilai kesiapan eksekusi',text:'Pilih Operational readiness 1–5, isi catatan berbasis bukti, kemudian tekan Simpan evidence.',tip:'Tuliskan sumber verifikasi, kendala, dan prasyarat implementasi.'},
-    {title:'Jaga kesinambungan data',text:'Gunakan Menu → Database & backup untuk memeriksa laporan Excel dan membuat backup pemulihan JSON.',tip:'Input tersimpan pada browser yang digunakan; lakukan backup berkala.'}
+    {title:'Dasbor Tim Operasional',text:'Lihat ringkasan performance dan buka kanal EDC atau Livin’ Merchant untuk memeriksa kelengkapan data.',tip:'Utamakan kesesuaian nomor rekening, identitas merchant, Sales Volume, dan Average Balance dengan laporan sumber.'},
+    ...DATA_GUIDE_STEPS,
+    {title:'Periksa hasil dan data kosong',text:'Gunakan pencarian dan filter untuk meninjau hasil upload. Buka detail dan cocokkan ringkasan angka, MID atau ID Toko, status transaksi, status rekening, dan lokasi sesuai kolom yang tersedia.',tip:'Kolom kosong tidak dipaksakan menjadi angka. Untuk memperbaiki fakta sumber, perbaiki Excel lalu upload versi yang sudah diperbarui.'},
+    {title:'Tinjau potensi dan kualitas skor',text:'Baca Input & Hasil Potensi Merchant dan Explainable Multifactor Score untuk melihat data tambahan dari RM / Sales serta confidence.',tip:'Potensi tampil read-only untuk Tim Operasional. Confidence rendah menunjukkan perlunya pemeriksaan kelengkapan data.'},
+    ...DATA_GUIDE_END
   ]
 };
 let currentUser=null;
@@ -1564,7 +1570,7 @@ function loginPrototype(username,password){
   applyRoleUI();
   showHome();
   addAudit('login','Sesi dimulai');
-  if(!localStorage.getItem('roleTutorialSeenV1:'+currentUser.role))setTimeout(()=>openRoleTutorial(0),180);
+  if(!localStorage.getItem('roleTutorialSeenV2Excel:'+currentUser.role))setTimeout(()=>openRoleTutorial(0),180);
   return true;
 }
 function logoutPrototype(){
@@ -1597,7 +1603,7 @@ function openRoleTutorial(step=0,manual=false){
   document.getElementById('drawerBackdrop').classList.add('open');
   addAudit('view_tutorial',`Panduan ${currentUser.role}: langkah ${index+1}`);
 }
-function finishRoleTutorial(){if(currentUser)localStorage.setItem('roleTutorialSeenV1:'+currentUser.role,'1');closeDrawer()}
+function finishRoleTutorial(){if(currentUser)localStorage.setItem('roleTutorialSeenV2Excel:'+currentUser.role,'1');closeDrawer()}
 function addAudit(type,summary,ch='',key=''){
   if(!currentUser)return;
   const a=readStore(FAIR_AUDIT_KEY,[]);a.unshift({ts:new Date().toISOString(),type,summary,ch,key,user:currentUser.username,role:currentUser.role});writeStore(FAIR_AUDIT_KEY,a.slice(0,200));
