@@ -6,7 +6,7 @@ Dashboard decision-support untuk prioritas retensi merchant EDC dan Livin' Merch
 
 Sumber utama dashboard adalah file Excel per kanal. Pilih **Upload data Excel**, lalu tentukan **Merchant EDC** atau **Livin' Merchant**. Sistem memvalidasi dan menampilkan preview sebelum data dipakai.
 
-Kolom wajib: `Nama Merchant`, `Nomor Rekening`, `Sales Volume YTD`, dan `Average Balance`. Template Excel untuk masing-masing kanal tersedia langsung pada halaman upload. Hasil impor disimpan per browser melalui IndexedDB dan menggantikan dataset kanal terkait setelah dikonfirmasi.
+Format laporan asli juga dikenali. Untuk laporan EDC, aplikasi menggabungkan sheet `Detail Merchant` dan `Detail Funding` berdasarkan nomor rekening, lalu mengelompokkan banyak MID menjadi satu merchant. Untuk laporan Livin', aplikasi membaca `sv_ytd` dan menghitung Average Balance dari `growth_avgbal_rekening_yoy` serta `pct_growth_avgbal_rekening_yoy`. Nilai kosong tetap dipertahankan sebagai data belum tersedia. Template sederhana untuk setiap kanal juga tersedia pada halaman upload.
 
 ## Menjalankan lokal
 
