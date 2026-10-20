@@ -985,6 +985,13 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 .priority-item{grid-template-columns:minmax(130px,1.5fr) minmax(80px,.7fr) minmax(80px,.7fr) 30px}
 @media(max-width:520px){.priority-item{grid-template-columns:minmax(0,1fr) 70px 28px}}
 </style>
+<style>
+.metric-potential{min-width:0}.metric-potential>b{display:block;color:#07558f}.metric-potential em{display:block;font-style:normal;color:#718593;font-size:7px;margin-top:4px}.potential-rank{display:inline-block;margin-top:6px;padding:4px 7px;background:#f1f4f6;color:#7b8c97;border-radius:6px;font-size:7px;font-weight:800}.potential-rank.available{background:#e3f3ee;color:#17664d}
+@media(min-width:1101px){.merchant-row{grid-template-columns:minmax(160px,1.45fr) repeat(5,minmax(80px,.7fr)) 38px;gap:10px}}
+@media(min-width:761px) and (max-width:1100px){.merchant-row{grid-template-columns:minmax(145px,1.4fr) repeat(4,minmax(74px,.7fr)) 34px}.merchant-row .metric-retention{display:none}}
+@media(min-width:521px) and (max-width:760px){.merchant-row{grid-template-columns:minmax(0,1.4fr) minmax(90px,1fr) 38px;grid-template-areas:"identity potential action" "avbal potential action" "gap potential action"}.merchant-row .metric-sv,.merchant-row .metric-retention{display:none}.identity-cell{grid-area:identity}.metric-avbal{grid-area:avbal}.metric-gap{grid-area:gap}.metric-potential{grid-area:potential}.row-open{grid-area:action}}
+@media(max-width:520px){.merchant-row{grid-template-areas:"identity action" "avbal action" "gap action" "potential action"}.metric-potential{grid-area:potential;border-top:1px solid #e6edf1;padding-top:8px}.metric-potential small{display:inline-block;margin-right:7px}.metric-potential>b{display:inline-block}.metric-potential em{display:inline-block;margin-left:7px}.potential-rank{margin-left:7px}}
+</style>
 </head>
 <body>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
@@ -1101,6 +1108,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
             <div><h3 id="listHeading">Prioritas Merchant</h3><p id="listSubheading">Prioritas berdasarkan gap pendanaan menuju target akhir 20%.</p></div>
             <select class="sort-select" id="sortSelect" onchange="renderWorkspace(true)">
               <option value="gap">Gap pendanaan terbesar</option>
+              <option value="potential">Ranking potensi SV tertinggi</option>
               <option value="sv">SV YTD terbesar</option>
               <option value="ratio">Retensi terendah</option>
               <option value="name">Nama A–Z</option>
@@ -1227,8 +1235,8 @@ function getPotentialData(channel,key){
   const all=readPotentialStore();
   return all[potentialStoreKey(channel,key)]||{basis:'assumption',realRevenue:'',visitors:'',avgTicket:'',days:'30',employees:'',avgSalary:''}
 }
-function savePotentialData(channel,key,data){const all=readPotentialStore();all[potentialStoreKey(channel,key)]=data;invalidateScores();return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
-function clearPotentialData(channel,key){const all=readPotentialStore();delete all[potentialStoreKey(channel,key)];invalidateScores();return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
+async function savePotentialData(channel,key,data){const all=readPotentialStore();all[potentialStoreKey(channel,key)]=data;await MerchantDB.write(POTENTIAL_STORE_KEY,all);invalidateScores();refreshPotentialViews()}
+async function clearPotentialData(channel,key){const all=readPotentialStore();delete all[potentialStoreKey(channel,key)];await MerchantDB.write(POTENTIAL_STORE_KEY,all);invalidateScores();refreshPotentialViews()}
 function numInput(v){const n=Number(v);return Number.isFinite(n)&&n>=0?n:0}
 function potentialSection(channel,key){
   const d=getPotentialData(channel,key),basis=d.basis==='real'?'real':'assumption';
@@ -1602,7 +1610,19 @@ function addAudit(type,summary,ch='',key=''){
 document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();loginPrototype(document.getElementById('loginUsername').value.trim(),document.getElementById('loginPassword').value)});
 
 // Portfolio navigation and read-only role permissions.
-function invalidateScores(){}
+const potentialRankingCache=new Map();
+function invalidateScores(){potentialRankingCache.clear()}
+function potentialVolumeRankings(channel){
+  if(potentialRankingCache.has(channel))return potentialRankingCache.get(channel);
+  const stored=readPotentialStore(),rows=channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS;
+  const values=rows.map(raw=>{const key=channel==='EDC'?raw.id:raw.key,d=stored[potentialStoreKey(channel,key)]||{},days=Math.max(1,Math.min(31,numInput(d.days)||30)),monthly=d.basis==='real'?numInput(d.realRevenue):numInput(d.visitors)*numInput(d.avgTicket)*days;return {key,monthly,basis:d.basis==='real'?'Omzet real':'Asumsi omzet'}}).filter(row=>row.monthly>0).sort((a,b)=>b.monthly-a.monthly||String(a.key).localeCompare(String(b.key)));
+  const result=new Map();let rank=0,last=null;values.forEach((row,index)=>{if(row.monthly!==last)rank=index+1;last=row.monthly;result.set(row.key,{...row,rank,total:values.length})});potentialRankingCache.set(channel,result);return result;
+}
+const _workspaceRowsPotential=workspaceRows;
+workspaceRows=function(){const rows=_workspaceRowsPotential();if(document.getElementById('sortSelect').value==='potential'){const ranks=potentialVolumeRankings(currentKanal);rows.sort((a,b)=>(ranks.get(b.key)?.monthly||0)-(ranks.get(a.key)?.monthly||0)||a.name.localeCompare(b.name))}return rows};
+const _merchantRowPotential=merchantRow;
+merchantRow=function(o){const p=potentialVolumeRankings(currentKanal).get(o.key),cell=`<div class="value-cell metric-potential"><small>Potensi SV / bulan</small><b>${p?compact(p.monthly):'—'}</b><span class="potential-rank ${p?'available':''}">${p?'Ranking #'+p.rank+' dari '+p.total:'Belum diisi'}</span>${p?`<em>${p.basis}</em>`:''}</div>`;return _merchantRowPotential(o).replace('<button class="row-open"',cell+'<button class="row-open"')};
+function refreshPotentialViews(){if(currentUser){renderHome();if(!document.getElementById('workspaceView').classList.contains('hidden'))renderWorkspace(false)}}
 function getEvidence(ch,key){return readStore(FAIR_EVIDENCE_KEY,{})[fairKey(ch,key)]||{}}
 const _openWorkspaceV2=openWorkspace;
 openWorkspace=function(ch){if(!currentUser)return;_openWorkspaceV2(ch);applyWorkspaceRole();animateView(document.getElementById('workspaceView'))};
