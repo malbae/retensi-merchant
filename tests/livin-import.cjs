@@ -18,7 +18,7 @@ const context = { XLSX, TARGET_FINAL: 0.2, N: value => Number(value) || 0 };
 vm.createContext(context);
 for (const name of ['normalizeImportHeader', 'importValue', 'importNumber',
   'nullableImportNumber', 'importBranchCode', 'filterFalatehanRows',
-  'normalizedExcelRows', 'prepareLivinWorkbookRows', 'mapImportedPerformance', 'livinMetric']) {
+  'normalizedExcelRows', 'convertLivinSources', 'prepareLivinWorkbookRows', 'mapImportedPerformance', 'livinMetric']) {
   vm.runInContext(sourceFunction(name), context);
 }
 const workbook = XLSX.utils.book_new();
@@ -65,3 +65,43 @@ assert.equal(context.livinMetric({ imported_avbal: 1000, sv_ytd: 100,
 assert.throws(() => context.prepareLivinWorkbookRows({ SheetNames: ['Sheet1'],
   Sheets: { Sheet1: workbook.Sheets.Sheet1 } }), /Wajib ada kolom/);
 console.log('Livin import: direct sources, sheet selection, branch, missing/zero, legacy and formula tests passed.');
+const auto = context.convertLivinSources({growth_avgbal_rekening_yoy: -173660,
+  pct_growth_avgbal_rekening_yoy: -0.749407195176377,
+  sv_ytd_qris_statis: 300000000, sv_ytd_qris_dinamis: 93482000});
+assert(Math.abs(auto.avgbal_final_year - 22999322.74126234) < 0.01);
+assert.equal(auto.sum_sv_ytd_stat_din, 393482000);
+assert.equal(auto.balance_source, 'calculated');
+assert.equal(auto.sv_source, 'calculated');
+const authoritative = context.convertLivinSources({...auto, avgbal_final_year: 0,
+  sum_sv_ytd_stat_din: 0});
+assert.equal(authoritative.avgbal_final_year, 0);
+assert.equal(authoritative.sum_sv_ytd_stat_din, 0);
+assert.equal(authoritative.balance_source, 'excel');
+assert.equal(context.convertLivinSources({...auto, avgbal_final_year: ''}).avgbal_final_year, null);
+assert.equal(context.convertLivinSources({growth_avgbal_rekening_yoy: 10,
+  pct_growth_avgbal_rekening_yoy: 0}).avgbal_final_year, null);
+assert.equal(context.convertLivinSources({sv_ytd_qris_statis: 100}).sum_sv_ytd_stat_din, null);
+assert.equal(context.convertLivinSources({sv_ytd_qris_statis: 0,
+  sv_ytd_qris_dinamis: 0}).sum_sv_ytd_stat_din, 0);
+const rawWorkbook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(rawWorkbook, XLSX.utils.json_to_sheet([{
+  store_name: 'Raw report', account_number: 'raw001', kode_cabang_final: '12600',
+  growth_avgbal_rekening_yoy: 100, pct_growth_avgbal_rekening_yoy: 10,
+  sv_ytd_qris_statis: 600, sv_ytd_qris_dinamis: 400
+}]), 'Sheet1');
+const rawResult = context.mapImportedPerformance(context.prepareLivinWorkbookRows(rawWorkbook), 'LIVIN');
+assert.equal(rawResult.valid[0].avgbal_final_year, 1100);
+assert.equal(rawResult.valid[0].sum_sv_ytd_stat_din, 1000);
+assert.equal(rawResult.valid[0].balance_source, 'calculated');
+console.log('Automatic conversion: template formula, mixed sources, direct precedence, zero and missing prerequisites passed.');
+if (process.argv[2]) {
+  const actualWorkbook = XLSX.read(fs.readFileSync(process.argv[2]), {type: 'buffer'});
+  const actual = context.mapImportedPerformance(context.prepareLivinWorkbookRows(actualWorkbook), 'LIVIN');
+  const actualMetrics = actual.valid.map(row => context.livinMetric(row));
+  console.log(JSON.stringify({rows: actual.valid.length, rejected: actual.errors.length,
+    available: actualMetrics.filter(row => row.implied !== null).length,
+    calculatedBalance: actual.valid.filter(row => row.balance_source === 'calculated').length,
+    calculatedSv: actual.valid.filter(row => row.sv_source === 'calculated').length,
+    achieved: actualMetrics.filter(row => row.ratio !== null && row.ratio >= 0.2).length,
+    gap: actualMetrics.reduce((sum, row) => sum + (row.gap || 0), 0)}));
+}
