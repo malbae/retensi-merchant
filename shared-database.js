@@ -25,9 +25,9 @@
   function accept(record){records.set(record.key,copy(record.value));versions[record.key]=record.version}
   function announce(){document.dispatchEvent(new CustomEvent('merchantdb:sync',{detail:{user}}))}
   async function sync(){
-    if(!connected||busy||document.hidden)return;
-    try{const data=await api('state?versions='+encodeURIComponent(JSON.stringify(versions)));if(busy)return;data.records.forEach(accept);if(data.records.length)announce();statusEvent(true);document.dispatchEvent(new CustomEvent('merchantdb:online'))}
-    catch(error){statusEvent(false);document.dispatchEvent(new CustomEvent('merchantdb:offline',{detail:error}))}
+    if(!connected||busy||document.hidden)return false;
+    try{const data=await api('state?versions='+encodeURIComponent(JSON.stringify(versions)));if(busy)return false;data.records.forEach(accept);if(data.records.length)announce();statusEvent(true);document.dispatchEvent(new CustomEvent('merchantdb:online'));return true}
+    catch(error){statusEvent(false);document.dispatchEvent(new CustomEvent('merchantdb:offline',{detail:error}));return false}
   }
   local.connectShared=async()=>{
     await originalReady;
@@ -66,5 +66,5 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
   if(hosted){
     local.ready=local.connectShared().catch(error=>{statusEvent(false);document.dispatchEvent(new CustomEvent('merchantdb:offline',{detail:error}));throw error});
-  }else originalReady.then(()=>{const element=document.getElementById('sharedConnectionStatus');if(element)element.textContent='Mode database browser · gunakan Cloudflare untuk sinkronisasi'});
+  }else originalReady.then(()=>{const element=document.getElementById('sharedConnectionStatus');if(element){element.title='Mode database browser';element.disabled=true}});
 })();

@@ -996,7 +996,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 </style>
 </head>
 <body>
-<div id="sharedConnectionStatus" style="position:fixed;bottom:10px;left:10px;z-index:9000;max-width:calc(100vw - 20px);background:#fff;border:1px solid #dce6ed;border-radius:9px;padding:8px 10px;font-size:11px;box-shadow:0 3px 12px #1233" role="status">Menghubungkan database…</div>
+<button id="sharedConnectionStatus" type="button" onclick="refreshSharedData(this)" style="position:fixed;bottom:10px;left:10px;z-index:9000;max-width:calc(100vw - 20px);display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #dce6ed;border-radius:8px;padding:6px 9px;color:#647d8d;font-size:10px;box-shadow:0 2px 8px #1231;cursor:pointer" title="Refresh data" aria-label="Refresh data"><span aria-hidden="true">↻</span><time id="sharedLastSync">—</time></button>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
 <div class="stage">
   <div class="app-shell">
@@ -1875,9 +1875,11 @@ jedaPrioritas();
 document.getElementById('loginView').classList.remove('hidden');
 document.addEventListener('merchantdb:connection',event=>{
   const el=document.getElementById('sharedConnectionStatus'),data=event.detail;
-  el.style.color=data.online?'#17664d':'#a33229';
-  el.textContent=data.online?'● Database pusat online · '+new Date().toLocaleTimeString('id-ID'):'● Database pusat offline · data belum tersinkron';
+  el.style.color=data.online?'#647d8d':'#a33229';
+  el.title=data.online?'Refresh data · terakhir diperbarui':'Koneksi terputus · klik untuk mencoba kembali';
+  if(data.online&&data.lastSync)document.getElementById('sharedLastSync').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(data.lastSync));
 });
+async function refreshSharedData(button){button.disabled=true;button.setAttribute('aria-busy','true');try{let ok;if(MerchantDB.status()!=='shared'){MerchantDB.ready=MerchantDB.connectShared();await MerchantDB.ready;ok=true}else ok=await MerchantDB.syncShared();if(ok)showToast('Data terbaru sudah dimuat.','success','Data diperbarui')}catch(error){showToast('Data belum dapat diperbarui. Periksa koneksi lalu coba lagi.','error')}finally{button.disabled=false;button.removeAttribute('aria-busy')}}
 async function migrateBrowserData(){try{await MerchantDB.migrateLocalData();closeDrawer();loadRegisteredMerchants();showToast('Data browser lama sudah dipindahkan ke database pusat. Pengguna lain akan menerima data yang sama.','success','Migrasi berhasil')}catch(error){showToast(error.message,'error','Data belum dipindahkan')}}
 document.addEventListener('merchantdb:sync',()=>{
   const card=document.getElementById('potentialCard'),channel=card?.dataset.channel,key=card?.dataset.key,dirty=card?.dataset.dirty==='true',changed=card&&card.dataset.loadedValue!==JSON.stringify(getPotentialData(channel,key));
