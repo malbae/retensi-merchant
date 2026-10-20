@@ -941,7 +941,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 
 /* Refined executive dashboard: restrained color, clear interaction hierarchy. */
 .dashboard-home{background:#f2f6f9}
-.dashboard-header{height:74px;border-bottom:1px solid #e2e9ee;box-shadow:0 3px 14px rgba(21,54,78,.045)}
+.dashboard-header{height:74px;border-bottom:1px solid #e2e9ee;box-shadow:0 3px 14px rgba(21,54,78,.045);z-index:100}
 .dashboard-header .brand-mark{background:#ffbf24;color:#063e75;box-shadow:none}
 .dashboard-nav{gap:6px}.dashboard-nav button{padding:9px 13px;color:#627787}.dashboard-nav button.active{background:#073f75;color:#fff;box-shadow:0 5px 12px rgba(7,63,117,.16)}.dashboard-nav button:hover{background:#eaf2f7;color:#073f75;transform:none}.dashboard-nav button.active:hover{background:#073f75;color:#fff}
 .dashboard-account .icon-btn{background:#fff;border:1px solid #d7e2e9;color:#073f75;box-shadow:0 4px 12px rgba(17,56,84,.07)}
@@ -955,6 +955,16 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 .channel-row{border:1px solid #dfe7ec;background:#fff;padding:13px;border-radius:12px;box-shadow:none}.channel-row.edc,.channel-row.livin{background:#fbfcfd;border-color:#dfe7ec}.channel-row:hover{transform:translateY(-1px);border-color:#83b8d8;background:#f7fbfe;box-shadow:0 7px 15px rgba(25,77,111,.08)}.channel-row.livin:hover{border-color:#dbb44a;background:#fffdf7}.channel-icon{background:#e5f1f8;color:#075c94;box-shadow:none}.channel-row.livin .channel-icon{background:#fff3cf;color:#876100;box-shadow:none}.channel-row em,.channel-row.livin em{width:28px;height:28px;border-radius:8px;background:#073f75;color:#fff}.secondary-link{background:transparent;border:1px solid #dfe7ec;color:#41677f}.secondary-link:hover{background:#f2f7fa;color:#073f75}
 .priority-item{border:1px solid #e0e8ed;background:#fff;border-radius:11px;padding:11px 12px}.priority-item:hover,.priority-item:focus-visible{transform:translateX(2px);border-color:#79accd;background:#fbfdff;box-shadow:0 6px 14px rgba(24,72,104,.07)}.priority-score{color:#4f46a8;background:#f0effb;padding:5px 8px}.priority-score:before{background:#665bc4}.priority-open{background:#e8f2f8;color:#075c94;box-shadow:none;display:grid;place-items:center}.priority-item:hover .priority-open{background:#073f75;color:#fff}
 @media(max-width:520px){.dashboard-main{padding:12px}.dashboard-home#homeView .dashboard-welcome{min-height:0;padding:20px;border-radius:15px}.dashboard-home#homeView .dashboard-welcome .eyebrow{font-size:6.5px}.dashboard-kpi{padding:14px}.dashboard-panel{padding:15px}}
+
+/* Compact, polished quick menu that never overwhelms the dashboard. */
+.dashboard-account .quick-menu{top:47px;right:0;width:205px;padding:7px;border:1px solid #dce5eb;border-radius:13px;background:rgba(255,255,255,.985);box-shadow:0 16px 38px rgba(17,48,70,.16);backdrop-filter:blur(14px);z-index:50;max-height:calc(100dvh - 105px);overflow:auto}
+.dashboard-account .quick-menu:before{content:"Menu cepat";display:block;padding:7px 10px 6px;color:#82919b;font-size:6.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.dashboard-account .quick-menu button{position:relative;width:100%;padding:9px 10px;border-radius:8px;color:#27485f;font-size:8.5px;font-weight:750;line-height:1.25;white-space:normal;transition:background .15s ease,color .15s ease,padding-left .15s ease}
+.dashboard-account .quick-menu button:hover{background:#edf5fa;color:#063f70;padding-left:13px}
+.dashboard-account .quick-menu button:nth-of-type(5),.dashboard-account .quick-menu button:nth-of-type(8){margin-top:5px;border-top:1px solid #edf1f4;border-radius:0;padding-top:12px}
+.dashboard-account .quick-menu button:nth-of-type(5):hover,.dashboard-account .quick-menu button:nth-of-type(8):hover{border-radius:8px}
+.dashboard-account .quick-menu button:nth-of-type(5){color:#8a6500}.dashboard-account .quick-menu button:nth-of-type(8){color:#a4443c}
+@media(max-width:520px){.dashboard-account .quick-menu{position:fixed;top:66px;right:12px;left:12px;width:auto;max-height:calc(100dvh - 80px)}.dashboard-account .quick-menu button{font-size:9px;padding:11px}}
 
 </style>
 </head>
