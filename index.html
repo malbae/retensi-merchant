@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Retensi Merchant Mandiri · Multifaktor Fairness v2</title>
+<title>Retensi Merchant Mandiri · Performance Merchant</title>
 <style>
 :root{
   --navy:#063b71;--navy-2:#092f57;--navy-3:#0b2441;--blue:#0877c9;--cyan:#66c8ff;
@@ -980,6 +980,10 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 /* Clear feedback for every data action. */
 .toast-stack{position:fixed;top:18px;right:18px;z-index:10000;display:grid;gap:10px;width:min(360px,calc(100vw - 28px));pointer-events:none}.app-toast{display:grid;grid-template-columns:34px 1fr auto;gap:11px;align-items:center;padding:12px 13px;border:1px solid #dbe6ed;border-radius:14px;background:rgba(255,255,255,.98);box-shadow:0 16px 38px rgba(20,55,78,.2);color:#29485d;opacity:0;transform:translateY(-10px);animation:toast-in .22s ease forwards;pointer-events:auto}.app-toast.leaving{animation:toast-out .18s ease forwards}.toast-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;font-weight:900}.app-toast.success .toast-icon{background:#dff5ea;color:#12704c}.app-toast.error .toast-icon{background:#fde8e5;color:#b33f34}.app-toast.info .toast-icon{background:#e5f2fb;color:#075b91}.toast-copy b{display:block;font-size:9px;color:#173f5a}.toast-copy span{display:block;margin-top:2px;font-size:7.5px;line-height:1.4;color:#708592}.toast-close{border:0;background:transparent;color:#80919c;font-size:15px;padding:4px;cursor:pointer}@keyframes toast-in{to{opacity:1;transform:none}}@keyframes toast-out{to{opacity:0;transform:translateY(-8px)}}@media(max-width:520px){.toast-stack{top:10px;right:14px;left:14px;width:auto}.app-toast{grid-template-columns:31px 1fr auto;padding:10px}.toast-icon{width:31px;height:31px}}
 
+/* Performance-only layout after removal of scoring. */
+@media(min-width:1101px){.merchant-row{grid-template-columns:minmax(180px,1.5fr) repeat(4,minmax(82px,.7fr)) 38px}}
+.priority-item{grid-template-columns:minmax(130px,1.5fr) minmax(80px,.7fr) minmax(80px,.7fr) 30px}
+@media(max-width:520px){.priority-item{grid-template-columns:minmax(0,1fr) 70px 28px}}
 </style>
 </head>
 <body>
@@ -989,16 +993,16 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 
     <section class="login-view" id="loginView" aria-label="Login prototype">
       <div class="login-visual">
-        <div class="login-brand"><div class="brand-mark">M</div><div><b>Retensi Merchant</b><span>Decision Support · Multifaktor & Fairness</span></div></div>
+        <div class="login-brand"><div class="brand-mark">M</div><div><b>Retensi Merchant</b><span>Performance · Cashflow · Payroll</span></div></div>
         <div class="login-message">
           <div class="login-kicker">Decision support yang dapat dijelaskan</div>
           <h1>Prioritas berbasis data,<br/>bukan siapa orangnya.</h1>
-          <p>Skor merchant memisahkan kebutuhan bisnis, potensi, momentum, kesiapan operasional, dan kualitas data. Identitas user, role, pemilik merchant, serta siapa RM yang menangani tidak dipakai untuk menaikkan atau menurunkan nilai.</p>
+          <p>Upload laporan Excel cabang Falatehan untuk melihat Sales Volume, Average Balance, retensi, dan gap pendanaan. Lengkapi potensi cashflow serta payroll merchant sesuai role Anda.</p>
         </div>
         <div class="login-principles">
-          <div class="login-principle"><small>Fairness</small><b>Identitas & role tidak menjadi faktor skor</b></div>
-          <div class="login-principle"><small>Explainability</small><b>Semua faktor, bobot, confidence, dan override terlihat</b></div>
-          <div class="login-principle"><small>Outcome</small><b>Efektivitas dan efisiensi dihitung dari log tindakan terverifikasi</b></div>
+          <div class="login-principle"><small>Performance</small><b>Data EDC dan Livin’ Merchant dari Excel</b></div>
+          <div class="login-principle"><small>Retensi</small><b>Pantau saldo dan gap menuju target 20%</b></div>
+          <div class="login-principle"><small>Potensi</small><b>Hitung cashflow dan payroll merchant</b></div>
         </div>
       </div>
       <div class="login-panel">
@@ -1031,7 +1035,6 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
           <button class="active" onclick="showHome()">Dasbor</button>
           <button onclick="openWorkspace('EDC')">Merchant EDC</button>
           <button onclick="openWorkspace('LIVIN')">Livin' Merchant</button>
-          <button onclick="openFairnessCenter()">Multifaktor & Bias</button>
         </nav>
         <div class="dashboard-account">
           <div id="homeSessionMini"></div>
@@ -1039,7 +1042,6 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
           <div class="quick-menu" id="quickMenu">
             <button onclick="openWorkspace('EDC')">Buka Merchant EDC</button>
             <button onclick="openWorkspace('LIVIN')">Buka Livin' Merchant</button>
-            <button onclick="openFairnessCenter()">Pusat Multifaktor & Bias</button>
             <button onclick="openMethodology()">Lihat metodologi</button>
             <button onclick="openPerformanceImport()">Upload data Excel</button>
             <button onclick="openDataCenter()">Database & backup</button>
@@ -1089,7 +1091,6 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
         </div>
         <button class="register-launch" onclick="openPerformanceImport(currentKanal)">Upload Excel</button>
         <button class="register-launch" style="background:#fff1ef;color:#a33229" onclick="requestChannelReset(currentKanal)">Reset data kanal</button>
-        <button class="workspace-fair-btn" onclick="openFairnessCenter()" style="border:1px solid #dce6ee;background:#f8fbfd;color:#395a71;border-radius:999px;padding:9px 11px;font-size:8px;font-weight:900;white-space:nowrap">Multifaktor & Bias</button>
         <div class="workspace-search"><input id="workspaceSearch" placeholder="Cari brand, nama legal, rekening, pemilik..." oninput="renderWorkspace(true)"/></div>
       <div class="workspace-session" id="workspaceSessionMini"></div>
       </header>
@@ -1099,7 +1100,6 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
           <div class="list-top">
             <div><h3 id="listHeading">Prioritas Merchant</h3><p id="listSubheading">Prioritas berdasarkan gap pendanaan menuju target akhir 20%.</p></div>
             <select class="sort-select" id="sortSelect" onchange="renderWorkspace(true)">
-              <option value="fair">Skor multifaktor tertinggi</option>
               <option value="gap">Gap pendanaan terbesar</option>
               <option value="sv">SV YTD terbesar</option>
               <option value="ratio">Retensi terendah</option>
@@ -1112,15 +1112,6 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
       </div>
     </section>
 
-    <section class="fairness-view hidden" id="fairnessView">
-      <header class="fairness-head">
-        <button class="back-home" onclick="showHome()">←</button>
-        <div class="fairness-head-title"><small>Governance · Decision Support</small><h2>Multifaktor, Bias & Outcome</h2></div>
-        <div class="fairness-head-spacer"></div>
-        <div id="fairnessSessionMini"></div>
-      </header>
-      <main class="fairness-body" id="fairnessBody"></main>
-    </section>
 
   </div>
 </div>
@@ -1519,9 +1510,9 @@ const DEMO_USERS={
   OPS:{username:'tim.operasional',password:'Ops#Mandiri26',role:'OPS',label:'Tim Operasional',name:'Operasional Falatehan'}
 };
 const ROLE_COPY={
-  BM:{headline:'Kendalikan prioritas secara konsisten.',copy:'Pantau performance EDC dan Livin’ dari Excel, tinjau gap pendanaan, potensi, skor, dan confidence untuk menentukan prioritas.',permission:'Melihat performance, profil, skor, dan laporan; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'},
-  RM:{headline:'Fokus pada merchant yang paling layak ditindaklanjuti.',copy:'Gunakan skor dan gap pendanaan untuk memilih prioritas, lalu lengkapi potensi cashflow serta payroll merchant.',permission:'Melihat performance dan skor; mengisi serta menyimpan potensi merchant. Dapat upload Excel dan reset data kanal.'},
-  OPS:{headline:'Jaga kualitas data performance.',copy:'Periksa file Excel, kelengkapan profil, Sales Volume, dan Average Balance sebelum data digunakan di dashboard.',permission:'Memeriksa performance, profil, dan skor; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'}
+  BM:{headline:'Kendalikan prioritas secara konsisten.',copy:'Pantau performance EDC dan Livin’ dari Excel, tinjau gap pendanaan, dan potensi untuk menentukan prioritas.',permission:'Melihat performance, profil, dan laporan; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'},
+  RM:{headline:'Fokus pada merchant yang paling layak ditindaklanjuti.',copy:'Gunakan gap pendanaan untuk memilih prioritas, lalu lengkapi potensi cashflow serta payroll merchant.',permission:'Melihat performance dan profil; mengisi serta menyimpan potensi merchant. Dapat upload Excel dan reset data kanal.'},
+  OPS:{headline:'Jaga kualitas data performance.',copy:'Periksa file Excel, kelengkapan profil, Sales Volume, dan Average Balance sebelum data digunakan di dashboard.',permission:'Memeriksa performance, profil, dan retensi; potensi merchant hanya dapat dibaca. Dapat upload Excel dan reset data kanal.'}
 };
 const DATA_GUIDE_STEPS=[
   {title:'Upload Excel sesuai kanal',text:'Klik Upload data Excel di Dasbor atau Upload Excel di daftar merchant. Pilih Data Merchant EDC atau Data Livin’ Merchant, lalu pilih file laporan. Tidak perlu mendaftarkan merchant satu per satu.',tip:'Hanya kode cabang 12600 (Falatehan) yang masuk. Data cabang lain atau tanpa kode dilewati. EDC membaca Detail Merchant dan Detail Funding berdasarkan rekening. Livin’ membaca laporan akuisisi dan menghitung estimasi AVBAL dari YoY. Template sederhana juga tersedia.'},
@@ -1535,14 +1526,14 @@ const ROLE_TUTORIALS={
   BM:[
     {title:'Dasbor Branch Manager',text:'Baca total merchant, gap pendanaan EDC, dan gap Livin’. Pilih tombol Merchant EDC atau Livin’ Merchant untuk meninjau portfolio kanal tersebut.',tip:'Gunakan ringkasan dan daftar prioritas sebagai dasar pengarahan tim.'},
     ...DATA_GUIDE_STEPS,
-    {title:'Tentukan prioritas review',text:'Cari nama merchant, rekening, atau pemilik; gunakan filter tahapan retensi dan urutan skor, gap, atau Sales Volume sesuai kebutuhan.',tip:'Target akhir retensi 20%; angka 10% merupakan tahap pemantauan. Confidence menunjukkan kelengkapan dan keandalan data.'},
-    {title:'Tinjau detail dan potensi',text:'Klik panah detail untuk melihat SV YTD, AVBAL, retensi, gap, ID Merchant, Profil Merchant, Input & Hasil Potensi Merchant, dan Explainable Multifactor Score.',tip:'Branch Manager melihat potensi secara read-only. Pengisian cashflow dan payroll dilakukan oleh RM / Sales.'},
+    {title:'Tentukan prioritas review',text:'Cari nama merchant, rekening, atau pemilik; gunakan filter tahapan retensi dan urutan gap atau Sales Volume sesuai kebutuhan.',tip:'Target akhir retensi 20%; angka 10% merupakan tahap pemantauan. Periksa nilai yang belum tersedia di laporan sumber.'},
+    {title:'Tinjau detail dan potensi',text:'Klik panah detail untuk melihat SV YTD, AVBAL, retensi, gap, ID Merchant, Profil Merchant, Input & Hasil Potensi Merchant.',tip:'Branch Manager melihat potensi secara read-only. Pengisian cashflow dan payroll dilakukan oleh RM / Sales.'},
     ...DATA_GUIDE_END
   ],
   RM:[
-    {title:'Dasbor RM / Sales',text:'Lihat ringkasan performance dan merchant prioritas, lalu pilih kanal Merchant EDC atau Livin’ Merchant yang akan ditindaklanjuti.',tip:'Gunakan pencarian, filter retensi, dan urutan skor untuk menemukan merchant yang tepat.'},
+    {title:'Dasbor RM / Sales',text:'Lihat ringkasan performance dan merchant prioritas, lalu pilih kanal Merchant EDC atau Livin’ Merchant yang akan ditindaklanjuti.',tip:'Gunakan pencarian, filter retensi, dan urutan gap pendanaan untuk menemukan merchant yang tepat.'},
     ...DATA_GUIDE_STEPS,
-    {title:'Pahami detail merchant',text:'Klik panah detail untuk membaca SV YTD, AVBAL, retensi, gap, ID Merchant, profil, potensi, dan faktor skor beserta confidence.',tip:'EDC memakai AVBAL aktual; Livin’ memakai estimasi AVBAL YoY. Nilai belum tersedia perlu diperiksa di sumber Excel.'},
+    {title:'Pahami detail merchant',text:'Klik panah detail untuk membaca SV YTD, AVBAL, retensi, gap, ID Merchant, profil, potensi.',tip:'EDC memakai AVBAL aktual; Livin’ memakai estimasi AVBAL YoY. Nilai belum tersedia perlu diperiksa di sumber Excel.'},
     {title:'Isi potensi cashflow dan payroll',text:'Pada Input & Hasil Potensi Merchant, pilih Omzet real atau Asumsi omzet. Untuk asumsi, isi pengunjung harian, harga rata-rata transaksi, dan hari operasional. Lengkapi jumlah karyawan serta gaji rata-rata bila tersedia.',tip:'Cashflow bulanan, payroll, proyeksi tahunan, dan porsi payroll dihitung otomatis saat input berubah.'},
     {title:'Simpan atau reset input potensi',text:'Klik Simpan ke database dan tunggu popup Data tersimpan. Gunakan Reset input untuk mengosongkan input potensi merchant yang sedang dibuka.',tip:'Reset input potensi berbeda dari Reset data kanal: reset potensi hanya mengosongkan formulir merchant ini.'},
     ...DATA_GUIDE_END
@@ -1551,7 +1542,7 @@ const ROLE_TUTORIALS={
     {title:'Dasbor Tim Operasional',text:'Lihat ringkasan performance dan buka kanal EDC atau Livin’ Merchant untuk memeriksa kelengkapan data.',tip:'Utamakan kesesuaian nomor rekening, identitas merchant, Sales Volume, dan Average Balance dengan laporan sumber.'},
     ...DATA_GUIDE_STEPS,
     {title:'Periksa hasil dan data kosong',text:'Gunakan pencarian dan filter untuk meninjau hasil upload. Buka detail dan cocokkan ringkasan angka, MID atau ID Toko, status transaksi, status rekening, dan lokasi sesuai kolom yang tersedia.',tip:'Kolom kosong tidak dipaksakan menjadi angka. Untuk memperbaiki fakta sumber, perbaiki Excel lalu upload versi yang sudah diperbarui.'},
-    {title:'Tinjau potensi dan kualitas skor',text:'Baca Input & Hasil Potensi Merchant dan Explainable Multifactor Score untuk melihat data tambahan dari RM / Sales serta confidence.',tip:'Potensi tampil read-only untuk Tim Operasional. Confidence rendah menunjukkan perlunya pemeriksaan kelengkapan data.'},
+    {title:'Tinjau potensi merchant',text:'Baca Input & Hasil Potensi Merchant untuk melihat estimasi cashflow dan payroll yang diisi RM / Sales.',tip:'Potensi tampil read-only untuk Tim Operasional. Periksa kelengkapan data pada laporan sumber.'},
     ...DATA_GUIDE_END
   ]
 };
@@ -1570,7 +1561,7 @@ function loginPrototype(username,password){
   applyRoleUI();
   showHome();
   addAudit('login','Sesi dimulai');
-  if(!localStorage.getItem('roleTutorialSeenV2Excel:'+currentUser.role))setTimeout(()=>openRoleTutorial(0),180);
+  if(!localStorage.getItem('roleTutorialSeenV3Performance:'+currentUser.role))setTimeout(()=>openRoleTutorial(0),180);
   return true;
 }
 function logoutPrototype(){
@@ -1603,147 +1594,31 @@ function openRoleTutorial(step=0,manual=false){
   document.getElementById('drawerBackdrop').classList.add('open');
   addAudit('view_tutorial',`Panduan ${currentUser.role}: langkah ${index+1}`);
 }
-function finishRoleTutorial(){if(currentUser)localStorage.setItem('roleTutorialSeenV2Excel:'+currentUser.role,'1');closeDrawer()}
+function finishRoleTutorial(){if(currentUser)localStorage.setItem('roleTutorialSeenV3Performance:'+currentUser.role,'1');closeDrawer()}
 function addAudit(type,summary,ch='',key=''){
   if(!currentUser)return;
   const a=readStore(FAIR_AUDIT_KEY,[]);a.unshift({ts:new Date().toISOString(),type,summary,ch,key,user:currentUser.username,role:currentUser.role});writeStore(FAIR_AUDIT_KEY,a.slice(0,200));
 }
 document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefault();loginPrototype(document.getElementById('loginUsername').value.trim(),document.getElementById('loginPassword').value)});
 
-// ----- Multifactor methodology -----
-const FAIR_WEIGHTS={gap:30,sv:20,retentionNeed:20,growth:15,potential:10,readiness:5};
-function clamp(v,min=0,max=1){return Math.max(min,Math.min(max,v))}
-const sortedPopulations=new WeakMap();
-function percentile(value,arr){if(value===null||value===undefined||!Number.isFinite(value)||!arr.length)return null;let sorted=sortedPopulations.get(arr);if(!sorted){sorted=[...arr].sort((a,b)=>a-b);sortedPopulations.set(arr,sorted)}const bound=inclusive=>{let lo=0,hi=sorted.length;while(lo<hi){const mid=(lo+hi)>>>1;if(sorted[mid]<value||(inclusive&&sorted[mid]===value))lo=mid+1;else hi=mid}return lo};return (bound(false)+bound(true))/(2*sorted.length)}
-function allMetrics(ch){return ch==='EDC'?EDC_RELATIONSHIPS.map(x=>({raw:x,x:edcMetric(x)})):LIVIN_MERCHANTS.map(x=>({raw:x,x:livinMetric(x)}))}
-const scorePopulationCache=new Map(),merchantScoreCache=new WeakMap();let scoreRevision=0;
-function invalidateScores(){scoreRevision++;scorePopulationCache.clear()}
-function baseArrays(ch){if(scorePopulationCache.has(ch))return scorePopulationCache.get(ch);const all=allMetrics(ch),data={gaps:all.map(o=>o.x.gap).filter(Number.isFinite),svs:all.map(o=>o.x.sv).filter(Number.isFinite)};scorePopulationCache.set(ch,data);return data}
-function growthSignal(ch,raw){
-  if(ch==='EDC'){
-    const prev=Number(raw.totals?.sv25),cur=Number(raw.totals?.sv26);if(!Number.isFinite(prev)||!Number.isFinite(cur)||prev<=0)return null;
-    const rate=(cur-prev)/prev*100;return clamp(.5+Math.atan(rate/100)/Math.PI);
-  }
-  const rate=Number(raw.pct_growth_avgbal_rekening_yoy);if(!Number.isFinite(rate))return null;return clamp(.5+Math.atan(rate/100)/Math.PI);
-}
-function monthlyPotentialFromStored(ch,key){
-  const d=getPotentialData(ch,key);if(!d)return null;
-  if(d.basis==='real'){const v=Number(d.realRevenue);return Number.isFinite(v)&&v>0?v:null}
-  const vis=Number(d.visitors),ticket=Number(d.avgTicket),days=Number(d.days||30);const v=vis*ticket*days;return Number.isFinite(v)&&v>0?v:null;
-}
-function potentialPopulation(ch){const k=ch+':potential';if(scorePopulationCache.has(k))return scorePopulationCache.get(k);const data=ch==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS,result=data.map(r=>monthlyPotentialFromStored(ch,ch==='EDC'?r.id:r.key)).filter(Number.isFinite);scorePopulationCache.set(k,result);return result}
-function getEvidence(ch,key){const all=readStore(FAIR_EVIDENCE_KEY,{});return all[fairKey(ch,key)]||{readiness:'',dataCheck:'unverified',opsNote:'',rmEvidence:'none',rmNote:'',override:'none',overrideReason:''}}
-function sourceReliability(ch,x){if(ch==='EDC')return x.avbal!==null ? .98 : .55;return x.yoyValid ? .78 : .45}
-function fairScore(ch,raw){
-  const cached=merchantScoreCache.get(raw);if(cached?.revision===scoreRevision)return cached.value;
-  const key=ch==='EDC'?raw.id:raw.key,x=ch==='EDC'?edcMetric(raw):livinMetric(raw),arr=baseArrays(ch),ev=getEvidence(ch,key),f=[];
-  const gap=percentile(x.gap,arr.gaps);if(gap!==null)f.push({k:'gap',label:'Funding gap',w:FAIR_WEIGHTS.gap,v:gap});
-  const sv=percentile(x.sv,arr.svs);if(sv!==null)f.push({k:'sv',label:'Skala SV',w:FAIR_WEIGHTS.sv,v:sv});
-  const need=x.ratio===null||x.ratio===undefined?null:clamp((TARGET_FINAL-x.ratio)/TARGET_FINAL);if(need!==null)f.push({k:'retentionNeed',label:'Retention need',w:FAIR_WEIGHTS.retentionNeed,v:need});
-  const grow=growthSignal(ch,raw);if(grow!==null)f.push({k:'growth',label:'Momentum',w:FAIR_WEIGHTS.growth,v:grow});
-  const pot=monthlyPotentialFromStored(ch,key),pots=potentialPopulation(ch);const potSig=pot?percentile(pot,pots):null;if(potSig!==null)f.push({k:'potential',label:'Potensi cashflow',w:FAIR_WEIGHTS.potential,v:potSig});
-  const rd=Number(ev.readiness);if(ev.dataCheck==='verified'&&Number.isFinite(rd)&&rd>=1&&rd<=5)f.push({k:'readiness',label:'Operational readiness',w:FAIR_WEIGHTS.readiness,v:(rd-1)/4});
-  const avail=f.reduce((a,z)=>a+z.w,0),weighted=f.reduce((a,z)=>a+z.w*z.v,0),score=avail?Math.round(weighted/avail*100):null;
-  const src=sourceReliability(ch,x),confidence=Math.round(clamp(.65*(avail/100)+.35*src)*100);
-  const label=confidence<60?'Perlu review data':score>=75?'Prioritas tinggi':score>=60?'Prioritas menengah':'Prioritas standar';
-  const value={score,confidence,label,factors:f,availableWeight:avail,override:ev.override,overrideReason:ev.overrideReason,x,key};merchantScoreCache.set(raw,{revision:scoreRevision,value});return value;
-}
-function scoreFactorValue(sc,k){const f=sc.factors.find(x=>x.k===k);return f?Math.round(f.v*100):null}
-
-// Workspace uses score as an explainable sorting option. Missing factors are re-normalized, never treated as zero.
-const _workspaceRowsV2=workspaceRows;
-workspaceRows=function(){const rows=_workspaceRowsV2();if(document.getElementById('sortSelect')?.value==='fair')rows.sort((a,b)=>{const A=fairScore(currentKanal,a.raw),B=fairScore(currentKanal,b.raw);return (B.score??-1)-(A.score??-1)||(B.confidence??0)-(A.confidence??0)});return rows};
-const _merchantRowV2=merchantRow;
-merchantRow=function(o){let html=_merchantRowV2(o),sc=fairScore(currentKanal,o.raw);const cell=`<div class="value-cell fair-score-cell"><small>Skor multifaktor</small><div class="score-line"><span class="score-dot"></span><b class="big">${sc.score??'—'}</b></div><em>confidence ${sc.confidence}%</em></div>`;return html.replace('<button class="row-open"',cell+'<button class="row-open"')};
+// Portfolio navigation and read-only role permissions.
+function invalidateScores(){}
+function getEvidence(ch,key){return readStore(FAIR_EVIDENCE_KEY,{})[fairKey(ch,key)]||{}}
 const _openWorkspaceV2=openWorkspace;
-openWorkspace=function(ch){if(!currentUser)return;document.getElementById('fairnessView').classList.add('hidden');_openWorkspaceV2(ch);document.getElementById('sortSelect').value='fair';renderWorkspace(false);applyWorkspaceRole();animateView(document.getElementById('workspaceView'))};
+openWorkspace=function(ch){if(!currentUser)return;_openWorkspaceV2(ch);applyWorkspaceRole();animateView(document.getElementById('workspaceView'))};
 function applyWorkspaceRole(){if(!currentUser)return;const area=document.querySelector('.list-area');area?.querySelector('.role-view-banner')?.remove();const b=document.createElement('div');b.className='role-view-banner';b.innerHTML=`<b>${esc(currentUser.label)}</b> · ${esc(ROLE_COPY[currentUser.role].permission)}`;area?.prepend(b)}
 
-// Home priority becomes multifactor; score never uses role/user identity.
-const _topLivinPrioritiesV2=topLivinPriorities;
-topLivinPriorities=function(){return LIVIN_MERCHANTS.map((l,i)=>({l,i,x:livinMetric(l),fair:fairScore('LIVIN',l)})).filter(o=>o.fair.score!==null).sort((a,b)=>(b.fair.score??-1)-(a.fair.score??-1)||(b.fair.confidence??0)-(a.fair.confidence??0)).slice(0,4)};
-const _renderPriorityV2=renderPriority;
-renderPriority=function(){_renderPriorityV2();const rows=topLivinPriorities(),o=rows[priorityIndex],card=document.getElementById('featureCard');if(!o||!card)return;const sm=card.querySelector('.feature-visual small');if(sm)sm.textContent='Prioritas multifaktor';const top=card.querySelector('.feature-copy .topline');if(top)top.innerHTML=`<span>${esc(o.fair.label)}</span><span>Score ${o.fair.score} · C${o.fair.confidence}%</span>`;const p=card.querySelector('.feature-copy p');if(p)p.insertAdjacentHTML('beforeend',`<br/><span style="color:#6b648c">Skor tidak memakai identitas user / owner.</span>`)};
-const _renderHomeV2=renderHome;
-renderHome=function(){_renderHomeV2();if(currentUser)applyRoleUI()};
-
 // Compact dashboard renderer: one glance for KPIs, channels, and priority work.
-renderPriority=function(){const card=document.getElementById('featureCard'),rows=topLivinPriorities();if(!card)return;card.innerHTML=rows.map(o=>`<div class="priority-item" role="button" tabindex="0" onclick="openDetail('LIVIN','${o.l.key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('LIVIN','${o.l.key}')}" aria-label="Buka detail ${esc(o.l.store_name)}"><div class="priority-name"><b>${esc(o.l.store_name)}</b><span>${esc(o.l.lob||'Merchant')} · ${esc(o.l.kabupaten||o.l.branch_name||'')}</span></div><div class="priority-metric"><small>Retensi</small><b>${pct(o.x.ratio)}</b></div><div class="priority-metric priority-gap"><small>Gap ke 20%</small><b>${compact(o.x.gap)}</b></div><div class="priority-score" title="Confidence ${o.fair.confidence}%">${o.fair.score}</div><span class="priority-open" aria-hidden="true">›</span></div>`).join('')||'<div class="empty-state">Belum ada prioritas merchant.</div>';document.getElementById('featureDots').innerHTML=''};
+renderPriority=function(){const card=document.getElementById('featureCard'),rows=topLivinPriorities();if(!card)return;card.innerHTML=rows.map(o=>`<div class="priority-item" role="button" tabindex="0" onclick="openDetail('LIVIN','${o.l.key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('LIVIN','${o.l.key}')}" aria-label="Buka detail ${esc(o.l.store_name)}"><div class="priority-name"><b>${esc(o.l.store_name)}</b><span>${esc(o.l.lob||'Merchant')} · ${esc(o.l.kabupaten||o.l.branch_name||'')}</span></div><div class="priority-metric"><small>Retensi</small><b>${pct(o.x.ratio)}</b></div><div class="priority-metric priority-gap"><small>Gap ke 20%</small><b>${compact(o.x.gap)}</b></div><span class="priority-open" aria-hidden="true">›</span></div>`).join('')||'<div class="empty-state">Belum ada prioritas merchant.</div>';document.getElementById('featureDots').innerHTML=''};
 renderHome=function(){E_SUM=summarizeEdc();L_SUM=summarizeLivin();document.getElementById('homeEdcSummary').innerHTML=`<article class="dashboard-kpi"><small>Total merchant EDC</small><b>${idFmt.format(E_SUM.count)}</b><span>${idFmt.format(E_SUM.mapped)} memiliki AVBAL aktual</span></article><article class="dashboard-kpi"><small>Gap pendanaan EDC</small><b>${compact(E_SUM.gap)}</b><span>${idFmt.format(E_SUM.achieved)} sudah mencapai ≥20%</span></article>`;document.getElementById('homeLivinSummary').innerHTML=`<article class="dashboard-kpi"><small>Total Livin' Merchant</small><b>${idFmt.format(L_SUM.count)}</b><span>${idFmt.format(L_SUM.mapped)} estimasi tersedia</span></article><article class="dashboard-kpi"><small>Gap pendanaan Livin'</small><b>${compact(L_SUM.gap)}</b><span>${idFmt.format(L_SUM.achieved)} sudah mencapai ≥20%</span></article>`;renderPriority();if(currentUser)applyRoleUI()};
 
-// ----- Detail evidence, action log, and role-controlled input -----
-function scoreCardHtml(ch,raw){const sc=fairScore(ch,raw);const map=[['gap','Funding gap'],['sv','Skala SV'],['retentionNeed','Retention need'],['growth','Momentum'],['potential','Potensi'],['readiness','Readiness']];return `<div class="score-card"><div class="score-card-head"><div><h3>Explainable Multifactor Score</h3><p>Faktor yang tidak tersedia tidak diberi nilai 0; bobot faktor yang tersedia dinormalisasi ulang. Confidence ditampilkan terpisah.</p></div><div class="score-badge"><b>${sc.score??'—'}</b><span>${esc(sc.label)}</span></div></div><div class="score-factors">${map.map(([k,label])=>{const v=scoreFactorValue(sc,k);return `<div class="score-factor"><small>${label}</small><b>${v===null?'Tidak tersedia':v+'/100'}</b></div>`}).join('')}</div><div class="confidence-row"><span>Confidence ${sc.confidence}% · ${sc.availableWeight}% bobot tersedia</span><span>Source reliability dipisahkan dari skor</span></div><div class="confidence-track"><span style="width:${sc.confidence}%"></span></div>${sc.override&&sc.override!=='none'?`<div class="override-note"><b>Manual override: ${esc(sc.override)}</b><br/>${esc(sc.overrideReason||'Tanpa alasan')}</div>`:''}</div>`}
-function actionLogFor(ch,key){return readStore(FAIR_ACTION_KEY,[]).filter(a=>a.ch===ch&&a.key===key)}
-function evidencePanelHtml(ch,raw){
-  const key=ch==='EDC'?raw.id:raw.key,ev=getEvidence(ch,key),logs=actionLogFor(ch,key),role=currentUser?.role||'';
-  return `<div class="evidence-card" id="evidenceCard" data-ch="${ch}" data-key="${esc(key)}"><h3>Evidence, Readiness & Outcome</h3><p>Input manual tidak boleh mengubah fakta sumber. Operational readiness hanya masuk skor jika Tim Operasional menandai data sebagai verified. Manual override Branch Manager tidak mengubah skor asli.</p>
-    <div class="evidence-grid">
-      <div class="evidence-field"><label>Verifikasi data operasional · Ops</label><select id="evDataCheck" ${role==='OPS'?'':'disabled'}><option value="unverified" ${ev.dataCheck==='unverified'?'selected':''}>Belum diverifikasi</option><option value="verified" ${ev.dataCheck==='verified'?'selected':''}>Verified</option><option value="needs_review" ${ev.dataCheck==='needs_review'?'selected':''}>Perlu review</option></select></div>
-      <div class="evidence-field"><label>Operational readiness · Ops</label><select id="evReadiness" ${role==='OPS'?'':'disabled'}><option value="">Belum dinilai</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${String(ev.readiness)===String(n)?'selected':''}>${n} / 5</option>`).join('')}</select></div>
-      <div class="evidence-field full"><label>Catatan operasional berbasis bukti</label><textarea id="evOpsNote" ${role==='OPS'?'':'disabled'} placeholder="Sumber/verifikasi, kendala, kesiapan implementasi...">${esc(ev.opsNote||'')}</textarea></div>
-      <div class="evidence-field"><label>Status evidence RM / Sales</label><select id="evRmEvidence" ${role==='RM'?'':'disabled'}><option value="none" ${ev.rmEvidence==='none'?'selected':''}>Belum ada evidence</option><option value="contacted" ${ev.rmEvidence==='contacted'?'selected':''}>Kontak terverifikasi</option><option value="meeting" ${ev.rmEvidence==='meeting'?'selected':''}>Meeting terverifikasi</option><option value="opportunity" ${ev.rmEvidence==='opportunity'?'selected':''}>Opportunity terverifikasi</option></select></div>
-      <div class="evidence-field"><label>Manual override · Branch Manager</label><select id="evOverride" ${role==='BM'?'':'disabled'}><option value="none" ${ev.override==='none'?'selected':''}>Tidak ada override</option><option value="raise" ${ev.override==='raise'?'selected':''}>Naikkan perhatian</option><option value="review" ${ev.override==='review'?'selected':''}>Wajib review</option><option value="hold" ${ev.override==='hold'?'selected':''}>Hold sementara</option></select></div>
-      <div class="evidence-field full"><label>Evidence / alasan sesuai role</label><textarea id="evRoleNote" placeholder="Catatan tindakan, evidence, atau alasan override...">${esc(role==='BM'?(ev.overrideReason||''):(role==='RM'?(ev.rmNote||''):(ev.opsNote||'')))}</textarea></div>
-    </div>
-    <div class="evidence-actions"><button class="evidence-save" type="button" onclick="saveEvidenceFromDetail()">Simpan evidence</button>${role==='RM'?'<button class="evidence-save secondary" type="button" onclick="openActionComposer()">+ Catat tindakan</button>':''}<span id="evidenceStatus" style="font-size:8px;color:#718493"></span></div>
-    <div class="role-lock-note">Role aktif: <b>${esc(currentUser?.label||'—')}</b>. ${esc(ROLE_COPY[role]?.permission||'')}</div>
-    <div id="actionComposer"></div>
-    <div class="action-log-list">${logs.length?logs.map(a=>`<button type="button" class="action-log-item" onclick="openActionDetail('${ch}','${esc(key)}','${encodeURIComponent(a.ts)}')"><span class="action-log-copy"><b>${esc(a.type)} · ${esc(actionOutcomeLabel(a.outcome))}</b><span>${esc(a.note||'Tanpa catatan')} · gap closed ${compact(a.gapClosed||0)} · ${new Date(a.ts).toLocaleString('id-ID')}</span></span><span class="action-log-arrow">→</span></button>`).join(''):'<div class="action-log-item">Belum ada log tindakan untuk merchant ini.</div>'}</div>
-  </div>`;
-}
-function actionOutcomeLabel(value){return ({no_response:'No response',contacted:'Contacted',meeting:'Meeting',opportunity:'Opportunity',gap_closed:'Gap closed / funding verified'})[value]||String(value||'—').replaceAll('_',' ')}
-function openActionDetail(ch,key,encodedTs){
-  if(!currentUser)return;const ts=decodeURIComponent(encodedTs),action=actionLogFor(ch,key).find(a=>a.ts===ts),raw=rawByKey(ch,key),drawer=document.getElementById('detailDrawer');if(!action||!raw)return;
-  const name=ch==='EDC'?edcIdentity(raw).brand:raw.store_name,legal=ch==='EDC'?edcIdentity(raw).legal:(raw.owner_name||'Pemilik —'),baseline=Math.max(0,Number(action.baselineGap)||0),closed=Math.max(0,Number(action.gapClosed)||0),remaining=Math.max(0,baseline-closed),actor=currentUser.role==='BM'?(action.actor||action.role||'—'):(DEMO_USERS[action.role]?.label||action.role||'—'),actionDate=action.actionDate?new Date(action.actionDate+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):new Date(action.ts).toLocaleDateString('id-ID');
-  drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">${esc(ch)} · Detail pencatatan tindakan</div><h2>${esc(action.type)} · ${esc(actionOutcomeLabel(action.outcome))}</h2><p>Riwayat tindakan tersimpan dan terhubung ke merchant terkait.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div>
-    <section class="action-detail-hero"><small>Merchant</small><h3>${esc(name)}</h3><p>${esc(legal)} · Rekening ${esc(raw.account||'—')}</p></section>
-    <div class="action-detail-grid"><div class="action-detail-metric"><small>Jenis tindakan</small><b>${esc(action.type||'—')}</b></div><div class="action-detail-metric"><small>Outcome</small><b>${esc(actionOutcomeLabel(action.outcome))}</b></div><div class="action-detail-metric"><small>Tanggal aksi</small><b>${esc(actionDate)}</b></div><div class="action-detail-metric"><small>Dicatat pada</small><b>${new Date(action.ts).toLocaleString('id-ID')}</b></div><div class="action-detail-metric"><small>Verified gap closed</small><b>${compact(closed)}</b></div><div class="action-detail-metric"><small>Baseline gap</small><b>${compact(baseline)}</b></div><div class="action-detail-metric"><small>Sisa baseline gap</small><b>${compact(remaining)}</b></div><div class="action-detail-metric"><small>Pelaksana</small><b>${esc(actor)}</b></div></div>
-    <div class="action-detail-note"><small>Catatan / evidence</small><p>${esc(action.note||'Tidak ada catatan tambahan.')}</p></div><button class="action-detail-back" type="button" onclick="openDetail('${ch}','${esc(key)}')">← Kembali ke detail merchant</button>`;
-  document.getElementById('drawerBackdrop').classList.add('open');addAudit('view_action_detail','Detail tindakan dibuka',ch,key);
-}
-function saveEvidenceFromDetail(){
-  if(!currentUser)return;const card=document.getElementById('evidenceCard');if(!card)return;const ch=card.dataset.ch,key=card.dataset.key,all=readStore(FAIR_EVIDENCE_KEY,{}),ev=all[fairKey(ch,key)]||getEvidence(ch,key),note=document.getElementById('evRoleNote').value.trim();
-  if(currentUser.role==='OPS'){ev.dataCheck=document.getElementById('evDataCheck').value;ev.readiness=document.getElementById('evReadiness').value;ev.opsNote=note||document.getElementById('evOpsNote').value.trim()}
-  if(currentUser.role==='RM'){ev.rmEvidence=document.getElementById('evRmEvidence').value;ev.rmNote=note}
-  if(currentUser.role==='BM'){ev.override=document.getElementById('evOverride').value;ev.overrideReason=note;if(ev.override!=='none'&&!note){document.getElementById('evidenceStatus').textContent='Alasan override wajib diisi.';return}}
-  all[fairKey(ch,key)]=ev;writeStore(FAIR_EVIDENCE_KEY,all);addAudit('evidence',currentUser.role==='BM'?'Override/evidence diperbarui':'Evidence diperbarui',ch,key);document.getElementById('evidenceStatus').textContent='Tersimpan.';refreshDetailScore(ch,key);renderFairnessCenter();
-}
-function openActionComposer(){if(currentUser?.role!=='RM')return;const box=document.getElementById('actionComposer');box.innerHTML=`<div style="margin-top:12px;padding:12px;border:1px solid #dfe8ef;border-radius:14px;background:#f9fbfd"><div class="evidence-grid"><div class="evidence-field"><label>Tindakan</label><select id="actType"><option>Call</option><option>Visit</option><option>Meeting</option><option>Proposal</option><option>Follow-up</option></select></div><div class="evidence-field"><label>Outcome</label><select id="actOutcome"><option value="no_response">No response</option><option value="contacted">Contacted</option><option value="meeting">Meeting</option><option value="opportunity">Opportunity</option><option value="gap_closed">Gap closed / funding verified</option></select></div><div class="evidence-field"><label>Verified gap closed (Rp)</label><input id="actGapClosed" type="number" min="0" step="100000" value="0"></div><div class="evidence-field"><label>Tanggal aksi</label><input id="actDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="evidence-field full"><label>Catatan / evidence</label><textarea id="actNote" placeholder="Ringkas evidence atau hasil tindakan"></textarea></div></div><div class="evidence-actions"><button class="evidence-save" type="button" onclick="saveActionLog()">Simpan tindakan</button></div></div>`}
-function rawByKey(ch,key){return ch==='EDC'?EDC_RELATIONSHIPS.find(x=>x.id===key):LIVIN_MERCHANTS.find(x=>x.key===key)}
-function saveActionLog(){if(currentUser?.role!=='RM')return;const card=document.getElementById('evidenceCard'),ch=card.dataset.ch,key=card.dataset.key,raw=rawByKey(ch,key),sc=fairScore(ch,raw),actions=readStore(FAIR_ACTION_KEY,[]),gapClosed=Math.max(0,Number(document.getElementById('actGapClosed').value)||0);actions.unshift({ts:new Date().toISOString(),actionDate:document.getElementById('actDate').value,type:document.getElementById('actType').value,outcome:document.getElementById('actOutcome').value,note:document.getElementById('actNote').value.trim(),gapClosed,baselineGap:sc.x.gap||0,ch,key,actor:currentUser.username,role:currentUser.role});writeStore(FAIR_ACTION_KEY,actions.slice(0,500));addAudit('action','Tindakan RM dicatat: '+document.getElementById('actOutcome').value,ch,key);document.getElementById('actionComposer').innerHTML='';document.getElementById('evidenceStatus').textContent='Tindakan tersimpan.';renderFairnessCenter();const drawer=document.getElementById('detailDrawer');drawer.querySelector('#evidenceCard')?.remove();drawer.insertAdjacentHTML('beforeend',evidencePanelHtml(ch,raw))}
-function refreshDetailScore(ch,key){const raw=rawByKey(ch,key),drawer=document.getElementById('detailDrawer');drawer.querySelector('.score-card')?.remove();const potential=drawer.querySelector('.potential-card');if(potential)potential.insertAdjacentHTML('afterend',scoreCardHtml(ch,raw));else drawer.insertAdjacentHTML('beforeend',scoreCardHtml(ch,raw))}
 
 // Focused detail view: source identity, portfolio metrics, potential, and score only.
 renderEdcDetail=function(r){const id=edcIdentity(r),x=edcMetric(r),st=retentionStatus(x.ratio),mids=(r.mids||[]);return `<div class="drawer-head"><div><div class="channel-label">EDC · Detail Merchant</div><h2>${esc(id.brand)}</h2><p>${esc(id.legal)} · rekening ${esc(r.account)}</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="detail-grid"><div class="detail-metric"><small>SV YTD</small><b>${compact(x.sv)}</b><em>Dataset performance EDC</em></div><div class="detail-metric"><small>AVBAL Aktual</small><b>${compact(x.avbal)}</b><em>Rekening settlement</em></div><div class="detail-metric"><small>Retensi</small><b>${pct(x.ratio)}</b><em>${st.label}</em></div><div class="detail-metric"><small>Gap Pendanaan</small><b>${compact(x.gap)}</b><em>${x.gap===null?'Menunggu AVBAL':'Saldo target '+compact(x.target)}</em></div></div><div class="detail-section"><h3>ID Merchant · hanya tersedia di detail</h3><div class="id-list">${mids.map(m=>`<div class="id-item"><span>${esc(m.dba||'Outlet')} · ${m.edc||0} EDC</span><b>MID ${esc(m.mid||'—')}</b></div>`).join('')||'<div class="id-item"><span>MID</span><b>—</b></div>'}</div></div><div class="detail-section"><h3>Profil Merchant</h3><table class="source-table"><tr><td>Nama legal</td><td>${esc(id.legal||'—')}</td></tr><tr><td>Jumlah outlet</td><td>${id.outlets||mids.length||'—'}</td></tr><tr><td>Jumlah EDC</td><td>${idFmt.format(N(r.totals?.edc))}</td></tr><tr><td>Cabang</td><td>${esc(r.branch_name||'—')}</td></tr><tr><td>Lokasi</td><td>${esc(r.kabupaten||r.address||'—')}</td></tr></table></div>`};
 renderLivinDetail=function(l){const x=livinMetric(l),st=retentionStatus(x.ratio);return `<div class="drawer-head"><div><div class="channel-label">Livin' Merchant · Detail</div><h2>${esc(l.store_name)}</h2><p>${esc(l.companytype||'Merchant')} · Pemilik ${esc(l.owner_name||'—')} · rekening ${esc(l.account)}</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="detail-grid"><div class="detail-metric"><small>SV YTD</small><b>${compact(x.sv)}</b><em>Dataset LVM</em></div><div class="detail-metric"><small>Estimasi AVBAL YoY</small><b>${compact(x.implied)}</b><em>${x.implied===null?'Belum tersedia':'Rekening YoY'}</em></div><div class="detail-metric"><small>Estimasi Retensi</small><b>${pct(x.ratio)}</b><em>${st.label}</em></div><div class="detail-metric"><small>Estimasi Gap Pendanaan</small><b>${compact(x.gap)}</b><em>${x.gap===null?'Menunggu estimasi AVBAL':'Saldo target '+compact(x.target)}</em></div></div><div class="detail-section"><h3>ID Merchant · hanya tersedia di detail</h3><div class="id-list"><div class="id-item"><span>MID Static</span><b>${esc(l.mid_static||'—')}</b></div><div class="id-item"><span>MID Dynamic</span><b>${esc(l.mid_dynamic||'—')}</b></div><div class="id-item"><span>ID Toko</span><b>${esc(l.raw?.store_id||l.store_id||'—')}</b></div></div></div><div class="detail-section"><h3>Profil Merchant</h3><table class="source-table"><tr><td>Status transaksi</td><td>${esc(l.status_trx||'—')}</td></tr><tr><td>Status rekening</td><td>${esc(l.status_rekening||'—')}</td></tr><tr><td>Peringkat</td><td>${esc(l.grading_trx||'—')}</td></tr><tr><td>Lini bisnis</td><td>${esc(l.lob||'—')}</td></tr><tr><td>Lokasi</td><td>${esc([l.kecamatan,l.kabupaten,l.provinsi].filter(Boolean).join(', ')||'—')}</td></tr></table></div>`};
 const _openDetailV2=openDetail;
-openDetail=function(ch,key){if(!currentUser)return;_openDetailV2(ch,key);const raw=rawByKey(ch,key),drawer=document.getElementById('detailDrawer');drawer.insertAdjacentHTML('beforeend',scoreCardHtml(ch,raw));const pc=drawer.querySelector('.potential-card');if(pc&&currentUser.role!=='RM'){pc.querySelectorAll('input,select,button').forEach(x=>x.disabled=true);pc.insertAdjacentHTML('afterbegin',`<div class="role-lock-note" style="margin:12px">Potensi cashflow dapat diubah oleh RM / Sales. Role ${esc(currentUser.label)} melihatnya dalam mode read-only.</div>`)}addAudit('view_detail','Detail merchant dibuka',ch,key)};
+openDetail=function(ch,key){if(!currentUser)return;_openDetailV2(ch,key);const drawer=document.getElementById('detailDrawer');const pc=drawer.querySelector('.potential-card');if(pc&&currentUser.role!=='RM'){pc.querySelectorAll('input,select,button').forEach(x=>x.disabled=true);pc.insertAdjacentHTML('afterbegin',`<div class="role-lock-note" style="margin:12px">Potensi cashflow dapat diubah oleh RM / Sales. Role ${esc(currentUser.label)} melihatnya dalam mode read-only.</div>`)}addAudit('view_detail','Detail merchant dibuka',ch,key)};
 
-// ----- Fairness Center / effectiveness / efficiency -----
-function aggregateScores(){const rows=[];for(const r of EDC_RELATIONSHIPS)rows.push({ch:'EDC',key:r.id,sc:fairScore('EDC',r)});for(const r of LIVIN_MERCHANTS)rows.push({ch:'LIVIN',key:r.key,sc:fairScore('LIVIN',r)});return rows}
-function performanceMetrics(){
-  const actions=readStore(FAIR_ACTION_KEY,[]),productiveSet=new Set(['meeting','opportunity','gap_closed']),productive=actions.filter(a=>productiveSet.has(a.outcome)),verifiedClosed=actions.reduce((s,a)=>s+(Number(a.gapClosed)||0),0),scores=aggregateScores(),high=scores.filter(o=>o.sc.score>=70&&o.sc.confidence>=60),actedHigh=new Set(actions.filter(a=>high.some(h=>h.ch===a.ch&&h.key===a.key)).map(a=>fairKey(a.ch,a.key)));
-  const productiveRate=actions.length?productive.length/actions.length:null,coverage=high.length?actedHigh.size/high.length:null,execEff=productiveRate!==null&&coverage!==null?(productiveRate*.6+coverage*.4):null;
-  const byMerchant=new Map();for(const a of actions){const k=fairKey(a.ch,a.key);if(!byMerchant.has(k))byMerchant.set(k,{baseline:Number(a.baselineGap)||0,closed:0});const m=byMerchant.get(k);m.baseline=Math.max(m.baseline,Number(a.baselineGap)||0);m.closed+=Number(a.gapClosed)||0}
-  let base=0,closed=0;for(const m of byMerchant.values()){if(m.baseline>0){base+=m.baseline;closed+=Math.min(m.closed,m.baseline)}}const businessEff=base>0?closed/base:null;
-  return {actions:actions.length,productive:productive.length,productiveRate,coverage,execEff,verifiedClosed,businessEff,perAction:actions.length?verifiedClosed/actions.length:null,perProductive:productive.length?verifiedClosed/productive.length:null,highCount:high.length};
-}
-function auditHtml(){const all=readStore(FAIR_AUDIT_KEY,[]).slice(0,8);if(!all.length)return '<div class="audit-row"><div class="audit-icon">·</div><div><b>Belum ada audit event</b><span>Event muncul setelah login, evidence, override, atau tindakan dicatat.</span></div></div>';return all.map(a=>`<div class="audit-row"><div class="audit-icon">${a.type==='action'?'↗':a.type==='evidence'?'✓':'•'}</div><div><b>${esc(a.summary)}</b><span>${esc(a.role)}${currentUser?.role==='BM'?' · '+esc(a.user):''}${a.ch?' · '+esc(a.ch)+' / '+esc(a.key):''}</span></div><time>${new Date(a.ts).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</time></div>`).join('')}
-function renderFairnessCenter(){
-  const body=document.getElementById('fairnessBody');if(!body||!currentUser)return;const scores=aggregateScores(),high=scores.filter(o=>o.sc.score>=70&&o.sc.confidence>=60).length,review=scores.filter(o=>o.sc.confidence<60).length,overrides=scores.filter(o=>o.sc.override&&o.sc.override!=='none').length,p=performanceMetrics(),rc=ROLE_COPY[currentUser.role];
-  body.innerHTML=`<div class="fairness-hero"><section class="fairness-intro"><div class="eyebrow">Role view · ${esc(currentUser.label)}</div><h1>Fairness by design, bukan “bias-free” claim.</h1><p>${esc(rc.permission)} Sistem mengurangi sumber bias melalui exclusion rules, explainable factors, confidence, evidence, dan audit. Hasil tetap decision support dan perlu monitoring outcome berkala.</p></section><section class="fairness-guard"><b>Guardrail aktif</b><div class="guard-list"><div class="guard-item"><span class="guard-check">✓</span><span>User, role, owner name, RM identity, gender/agama/usia tidak menjadi faktor skor.</span></div><div class="guard-item"><span class="guard-check">✓</span><span>Missing factor tidak otomatis bernilai 0; bobot yang tersedia dinormalisasi ulang.</span></div><div class="guard-item"><span class="guard-check">✓</span><span>EDC aktual dan Livin estimasi tidak dibandingkan sebagai satu sumber yang setara; confidence dipisahkan.</span></div><div class="guard-item"><span class="guard-check">✓</span><span>Manual override tidak mengubah skor asli dan wajib beralasan.</span></div></div></section></div>
-    <div class="fairness-kpis"><div class="fair-kpi"><small>Total merchant/relasi dinilai</small><b>${idFmt.format(scores.length)}</b><span>Semua memakai rule yang sama di dalam kanalnya</span></div><div class="fair-kpi"><small>Prioritas tinggi & confidence ≥60%</small><b>${idFmt.format(high)}</b><span>Skor ≥70, bukan berdasarkan owner/RM</span></div><div class="fair-kpi"><small>Perlu review data</small><b>${idFmt.format(review)}</b><span>Confidence &lt;60%; jangan otomatis dieksekusi</span></div><div class="fair-kpi"><small>Manual override aktif</small><b>${idFmt.format(overrides)}</b><span>Tersimpan terpisah dari score</span></div></div>
-    <div class="fair-grid"><section class="fair-card"><h3>Metodologi Skor Multifaktor</h3><p>Skor 0–100 dihitung hanya dari faktor bisnis yang tersedia. Lokasi/branch dipakai untuk konteks tampilan, bukan menaikkan nilai.</p><div class="factor-list">${[['Funding gap',30],['Skala SV',20],['Retention need',20],['Momentum pertumbuhan',15],['Potensi cashflow',10],['Operational readiness',5]].map(([n,w])=>`<div class="factor-row"><span>${n}</span><div class="factor-bar"><i style="width:${w/30*100}%"></i></div><b>${w}%</b></div>`).join('')}</div><div class="method-note"><b>Normalisasi:</b> gap & SV memakai percentile di kanal yang sama; retention need memakai jarak terhadap target 20%; momentum memakai transformasi bounded; potensi hanya digunakan bila RM mengisi data; readiness hanya aktif bila diverifikasi Ops. Bila faktor hilang, bobot faktor tersedia dinormalisasi ulang. Confidence tetap turun agar ketidakpastian terlihat.</div></section>
-    <section class="fair-card"><h3>Cakupan Bias yang Dikendalikan</h3><p>Bukan hanya bias internal tim, tetapi juga bias terhadap merchant/pihak lain dan bias dari data/proses.</p><div class="bias-grid"><div class="bias-tile"><b>People / Team Bias</b><span>Role, username, siapa RM, dan performa personal tidak masuk merchant score.</span></div><div class="bias-tile"><b>Merchant / Identity Bias</b><span>Owner identity dan atribut sensitif tidak digunakan. Nama hanya untuk identifikasi hasil.</span></div><div class="bias-tile"><b>Data Coverage Bias</b><span>Missing ≠ buruk. Sistem menampilkan confidence dan review flag, bukan memberi nol.</span></div><div class="bias-tile"><b>Process / Override Bias</b><span>Override wajib alasan, disimpan terpisah, dapat diaudit, tidak mengubah nilai asli.</span></div><div class="bias-tile"><b>Channel Bias</b><span>EDC actual vs Livin estimate tetap dibedakan; tidak dicampur sebagai sumber setara.</span></div><div class="bias-tile"><b>Outcome Bias</b><span>Efektivitas dilihat dari gap closed dan coverage, bukan banyaknya aktivitas saja.</span></div></div></section></div>
-    <div class="fair-grid"><section class="fair-card"><h3>Nilai Efektivitas</h3><p>Outcome finansial hanya dihitung dari “verified gap closed” yang dicatat RM; sistem tidak mengasumsikan keberhasilan dari meeting/call.</p><div class="performance-grid"><div class="performance-box"><small>Business effectiveness</small><b>${p.businessEff===null?'Belum cukup data':(p.businessEff*100).toFixed(1)+'%'}</b><span>Verified gap closed ÷ baseline gap merchant yang sudah ditindak</span></div><div class="performance-box"><small>Execution effectiveness</small><b>${p.execEff===null?'Belum cukup data':(p.execEff*100).toFixed(1)+'%'}</b><span>60% productive outcome rate + 40% high-priority coverage</span></div><div class="performance-box"><small>High-priority coverage</small><b>${p.coverage===null?'—':(p.coverage*100).toFixed(1)+'%'}</b><span>Merchant prioritas tinggi yang sudah memiliki action log</span></div><div class="performance-box"><small>Productive outcome rate</small><b>${p.productiveRate===null?'—':(p.productiveRate*100).toFixed(1)+'%'}</b><span>Meeting/opportunity/gap closed ÷ seluruh action</span></div></div><div class="performance-formula">Business Effectiveness = Σ Verified Gap Closed / Σ Baseline Gap\nExecution Effectiveness = 60% × Productive Outcome Rate + 40% × High-Priority Coverage</div></section>
-    <section class="fair-card"><h3>Nilai Efisiensi</h3><p>Efisiensi dinilai sebagai hasil terverifikasi per effort, sehingga jumlah aktivitas yang banyak tidak otomatis dianggap lebih baik.</p><div class="performance-grid"><div class="performance-box"><small>Verified gap closed</small><b>${compact(p.verifiedClosed)}</b><span>Dari action log terverifikasi</span></div><div class="performance-box"><small>Gap closed / action</small><b>${p.perAction===null?'—':compact(p.perAction)}</b><span>Efisiensi finansial terhadap seluruh effort</span></div><div class="performance-box"><small>Gap closed / productive action</small><b>${p.perProductive===null?'—':compact(p.perProductive)}</b><span>Efisiensi per outcome produktif</span></div><div class="performance-box"><small>Total action / productive</small><b>${p.actions} / ${p.productive}</b><span>Volume effort dan action yang menghasilkan progress</span></div></div><div class="performance-formula">Efficiency Value = Verified Gap Closed / Action Count\nProductive Efficiency = Verified Gap Closed / Productive Action Count</div></section></div>
-    <section class="fair-card" style="margin-top:14px"><h3>Audit Trail</h3><p>Log ini membantu mendeteksi bias proses dan intervensi manual. Branch Manager dapat melihat username; role lain melihat role saja.</p><div class="audit-list">${auditHtml()}</div></section>`;
-}
-function openFairnessCenter(){if(!currentUser)return;closeDrawer();jedaPrioritas();document.getElementById('homeView').classList.add('hidden');document.getElementById('workspaceView').classList.add('hidden');document.getElementById('fairnessView').classList.remove('hidden');renderSessionMinis();renderFairnessCenter();animateView(document.getElementById('fairnessView'));addAudit('view_fairness','Pusat multifaktor & bias dibuka')}
-
-// Methodology is expanded with fairness rules.
-const _openMethodologyV2=openMethodology;
-openMethodology=function(){if(!currentUser)return;_openMethodologyV2();const d=document.getElementById('detailDrawer');d.insertAdjacentHTML('beforeend',`<div class="detail-section"><h3>Metodologi Anti-Bias & Multifaktor</h3><div class="detail-note"><b>Sistem tidak menjanjikan “bias-free”.</b> Kontrol yang diterapkan: atribut orang/role tidak masuk score; missing factor tidak bernilai nol; confidence dipisahkan; EDC actual dan Livin estimate tetap dibedakan; override wajib alasan dan tidak mengubah score.</div><div class="calc-card"><div class="formula">Multifactor Score = Σ(weight × normalized factor) ÷ Σ(weight available) × 100\nWeights: Gap 30% · SV 20% · Retention Need 20% · Momentum 15% · Potential 10% · Readiness 5%\nConfidence = 65% × available-weight coverage + 35% × source reliability</div></div></div><div class="detail-section"><h3>Efektivitas & Efisiensi</h3><div class="calc-card"><div class="formula">Business Effectiveness = Σ Verified Gap Closed ÷ Σ Baseline Gap\nExecution Effectiveness = 60% × Productive Outcome Rate + 40% × High-Priority Coverage\nEfficiency = Verified Gap Closed ÷ Total Action\nProductive Efficiency = Verified Gap Closed ÷ Productive Action</div></div><div class="detail-note">Call/meeting tidak otomatis dianggap sukses. Nilai finansial hanya berasal dari gap closed yang ditandai verified pada action log.</div></div>`);addAudit('view_methodology','Metodologi dibuka')};
 
 // ----- Registration for new EDC / Livin' merchants -----
 const REGISTERED_MERCHANTS_KEY='mandiriRegisteredMerchantsV1';
@@ -1953,7 +1828,7 @@ async function importDatabaseBackup(file){
 
 // Final navigation wrappers: all page changes animate and preserve session state.
 const _showHomeV2=showHome;
-showHome=function(){if(!currentUser)return;document.getElementById('fairnessView').classList.add('hidden');_showHomeV2();renderHome();renderSessionMinis();animateView(document.getElementById('homeView'))};
+showHome=function(){if(!currentUser)return;_showHomeV2();renderHome();renderSessionMinis();animateView(document.getElementById('homeView'))};
 
 // Start strictly on login for every file load.
 jedaPrioritas();
