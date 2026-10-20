@@ -1088,6 +1088,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
           <button id="tabLivin" onclick="openWorkspace('LIVIN')">Livin' Merchant</button>
         </div>
         <button class="register-launch" onclick="openPerformanceImport(currentKanal)">Upload Excel</button>
+        <button class="register-launch" style="background:#fff1ef;color:#a33229" onclick="requestChannelReset(currentKanal)">Reset data kanal</button>
         <button class="workspace-fair-btn" onclick="openFairnessCenter()" style="border:1px solid #dce6ee;background:#f8fbfd;color:#395a71;border-radius:999px;padding:9px 11px;font-size:8px;font-weight:900;white-space:nowrap">Multifaktor & Bias</button>
         <div class="workspace-search"><input id="workspaceSearch" placeholder="Cari brand, nama legal, rekening, pemilik..." oninput="renderWorkspace(true)"/></div>
       <div class="workspace-session" id="workspaceSessionMini"></div>
@@ -1235,8 +1236,8 @@ function getPotentialData(channel,key){
   const all=readPotentialStore();
   return all[potentialStoreKey(channel,key)]||{basis:'assumption',realRevenue:'',visitors:'',avgTicket:'',days:'30',employees:'',avgSalary:''}
 }
-function savePotentialData(channel,key,data){const all=readPotentialStore();all[potentialStoreKey(channel,key)]=data;return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
-function clearPotentialData(channel,key){const all=readPotentialStore();delete all[potentialStoreKey(channel,key)];return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
+function savePotentialData(channel,key,data){const all=readPotentialStore();all[potentialStoreKey(channel,key)]=data;invalidateScores();return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
+function clearPotentialData(channel,key){const all=readPotentialStore();delete all[potentialStoreKey(channel,key)];invalidateScores();return MerchantDB.write(POTENTIAL_STORE_KEY,all)}
 function numInput(v){const n=Number(v);return Number.isFinite(n)&&n>=0?n:0}
 function potentialSection(channel,key){
   const d=getPotentialData(channel,key),basis=d.basis==='real'?'real':'assumption';
@@ -1551,7 +1552,7 @@ const ROLE_TUTORIALS={
 let currentUser=null;
 const FAIR_EVIDENCE_KEY='mandiriFairEvidenceV2', FAIR_ACTION_KEY='mandiriFairActionsV2', FAIR_AUDIT_KEY='mandiriFairAuditV2';
 function readStore(key,fallback){return MerchantDB.read(key,fallback)}
-function writeStore(key,val){return MerchantDB.write(key,val)}
+function writeStore(key,val){if(key===FAIR_EVIDENCE_KEY)invalidateScores();return MerchantDB.write(key,val)}
 function fairKey(ch,key){return ch+'::'+key}
 function fillDemo(role){const u=DEMO_USERS[role];document.getElementById('loginUsername').value=u.username;document.getElementById('loginPassword').value=u.password;document.getElementById('loginError').textContent=''}
 function animateView(el){if(!el)return;el.classList.remove('view-enter');void el.offsetWidth;el.classList.add('view-enter')}
@@ -1606,9 +1607,12 @@ document.getElementById('loginForm').addEventListener('submit',e=>{e.preventDefa
 // ----- Multifactor methodology -----
 const FAIR_WEIGHTS={gap:30,sv:20,retentionNeed:20,growth:15,potential:10,readiness:5};
 function clamp(v,min=0,max=1){return Math.max(min,Math.min(max,v))}
-function percentile(value,arr){if(value===null||value===undefined||!Number.isFinite(value)||!arr.length)return null;let below=0,equal=0;for(const n of arr){if(n<value)below++;else if(n===value)equal++}return (below+.5*equal)/arr.length}
+const sortedPopulations=new WeakMap();
+function percentile(value,arr){if(value===null||value===undefined||!Number.isFinite(value)||!arr.length)return null;let sorted=sortedPopulations.get(arr);if(!sorted){sorted=[...arr].sort((a,b)=>a-b);sortedPopulations.set(arr,sorted)}const bound=inclusive=>{let lo=0,hi=sorted.length;while(lo<hi){const mid=(lo+hi)>>>1;if(sorted[mid]<value||(inclusive&&sorted[mid]===value))lo=mid+1;else hi=mid}return lo};return (bound(false)+bound(true))/(2*sorted.length)}
 function allMetrics(ch){return ch==='EDC'?EDC_RELATIONSHIPS.map(x=>({raw:x,x:edcMetric(x)})):LIVIN_MERCHANTS.map(x=>({raw:x,x:livinMetric(x)}))}
-function baseArrays(ch){const all=allMetrics(ch);return {gaps:all.map(o=>o.x.gap).filter(Number.isFinite),svs:all.map(o=>o.x.sv).filter(Number.isFinite)}}
+const scorePopulationCache=new Map(),merchantScoreCache=new WeakMap();let scoreRevision=0;
+function invalidateScores(){scoreRevision++;scorePopulationCache.clear()}
+function baseArrays(ch){if(scorePopulationCache.has(ch))return scorePopulationCache.get(ch);const all=allMetrics(ch),data={gaps:all.map(o=>o.x.gap).filter(Number.isFinite),svs:all.map(o=>o.x.sv).filter(Number.isFinite)};scorePopulationCache.set(ch,data);return data}
 function growthSignal(ch,raw){
   if(ch==='EDC'){
     const prev=Number(raw.totals?.sv25),cur=Number(raw.totals?.sv26);if(!Number.isFinite(prev)||!Number.isFinite(cur)||prev<=0)return null;
@@ -1621,10 +1625,11 @@ function monthlyPotentialFromStored(ch,key){
   if(d.basis==='real'){const v=Number(d.realRevenue);return Number.isFinite(v)&&v>0?v:null}
   const vis=Number(d.visitors),ticket=Number(d.avgTicket),days=Number(d.days||30);const v=vis*ticket*days;return Number.isFinite(v)&&v>0?v:null;
 }
-function potentialPopulation(ch){const data=ch==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS;return data.map(r=>monthlyPotentialFromStored(ch,ch==='EDC'?r.id:r.key)).filter(Number.isFinite)}
+function potentialPopulation(ch){const k=ch+':potential';if(scorePopulationCache.has(k))return scorePopulationCache.get(k);const data=ch==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS,result=data.map(r=>monthlyPotentialFromStored(ch,ch==='EDC'?r.id:r.key)).filter(Number.isFinite);scorePopulationCache.set(k,result);return result}
 function getEvidence(ch,key){const all=readStore(FAIR_EVIDENCE_KEY,{});return all[fairKey(ch,key)]||{readiness:'',dataCheck:'unverified',opsNote:'',rmEvidence:'none',rmNote:'',override:'none',overrideReason:''}}
 function sourceReliability(ch,x){if(ch==='EDC')return x.avbal!==null ? .98 : .55;return x.yoyValid ? .78 : .45}
 function fairScore(ch,raw){
+  const cached=merchantScoreCache.get(raw);if(cached?.revision===scoreRevision)return cached.value;
   const key=ch==='EDC'?raw.id:raw.key,x=ch==='EDC'?edcMetric(raw):livinMetric(raw),arr=baseArrays(ch),ev=getEvidence(ch,key),f=[];
   const gap=percentile(x.gap,arr.gaps);if(gap!==null)f.push({k:'gap',label:'Funding gap',w:FAIR_WEIGHTS.gap,v:gap});
   const sv=percentile(x.sv,arr.svs);if(sv!==null)f.push({k:'sv',label:'Skala SV',w:FAIR_WEIGHTS.sv,v:sv});
@@ -1635,7 +1640,7 @@ function fairScore(ch,raw){
   const avail=f.reduce((a,z)=>a+z.w,0),weighted=f.reduce((a,z)=>a+z.w*z.v,0),score=avail?Math.round(weighted/avail*100):null;
   const src=sourceReliability(ch,x),confidence=Math.round(clamp(.65*(avail/100)+.35*src)*100);
   const label=confidence<60?'Perlu review data':score>=75?'Prioritas tinggi':score>=60?'Prioritas menengah':'Prioritas standar';
-  return {score,confidence,label,factors:f,availableWeight:avail,override:ev.override,overrideReason:ev.overrideReason,x,key};
+  const value={score,confidence,label,factors:f,availableWeight:avail,override:ev.override,overrideReason:ev.overrideReason,x,key};merchantScoreCache.set(raw,{revision:scoreRevision,value});return value;
 }
 function scoreFactorValue(sc,k){const f=sc.factors.find(x=>x.k===k);return f?Math.round(f.v*100):null}
 
@@ -1737,14 +1742,14 @@ openMethodology=function(){if(!currentUser)return;_openMethodologyV2();const d=d
 // ----- Registration for new EDC / Livin' merchants -----
 const REGISTERED_MERCHANTS_KEY='mandiriRegisteredMerchantsV1';
 function registeredMerchantStore(){return MerchantDB.read(REGISTERED_MERCHANTS_KEY,{edc:[],livin:[]})||{edc:[],livin:[]}}
-function refreshPortfolioSummary(){E_SUM=summarizeEdc();L_SUM=summarizeLivin()}
+function refreshPortfolioSummary(){invalidateScores();E_SUM=summarizeEdc();L_SUM=summarizeLivin()}
 function loadRegisteredMerchants(){
   const imported=performanceImportStore();
-  if((imported.edc||[]).length)EDC_RELATIONSHIPS.splice(0,EDC_RELATIONSHIPS.length,...imported.edc);
-  if((imported.livin||[]).length)LIVIN_MERCHANTS.splice(0,LIVIN_MERCHANTS.length,...imported.livin);
+  if(imported.meta?.edc||(imported.edc||[]).length)EDC_RELATIONSHIPS.splice(0,EDC_RELATIONSHIPS.length,...imported.edc);
+  if(imported.meta?.livin||(imported.livin||[]).length)LIVIN_MERCHANTS.splice(0,LIVIN_MERCHANTS.length,...imported.livin);
   const saved=registeredMerchantStore();
-  if(!(imported.edc||[]).length)for(const row of saved.edc||[])if(!EDC_RELATIONSHIPS.some(x=>x.id===row.id))EDC_RELATIONSHIPS.push(row);
-  if(!(imported.livin||[]).length)for(const row of saved.livin||[])if(!LIVIN_MERCHANTS.some(x=>x.key===row.key))LIVIN_MERCHANTS.push(row);
+  if(!imported.meta?.edc&&!(imported.edc||[]).length)for(const row of saved.edc||[])if(!EDC_RELATIONSHIPS.some(x=>x.id===row.id))EDC_RELATIONSHIPS.push(row);
+  if(!imported.meta?.livin&&!(imported.livin||[]).length)for(const row of saved.livin||[])if(!LIVIN_MERCHANTS.some(x=>x.key===row.key))LIVIN_MERCHANTS.push(row);
   refreshPortfolioSummary();
   if(currentUser){renderHome();if(!document.getElementById('workspaceView').classList.contains('hidden'))renderWorkspace(false)}
 }
@@ -1811,6 +1816,20 @@ async function saveRegisteredMerchant(event){
 // ----- Excel-first performance intake -----
 const PERFORMANCE_IMPORT_KEY='mandiriPerformanceExcelV1';
 let pendingExcelImport=null;
+let excelReadSequence=0,activeExcelWorker=null,importSaving=false;
+function processExcelInBackground(file,channel){
+  const definitions=[normalizeImportHeader,importValue,importNumber,normalizedExcelRows,prepareEdcWorkbookRows,prepareLivinWorkbookRows,mapImportedPerformance].map(fn=>fn.toString()).join('\n');
+  const code=`importScripts(${JSON.stringify(new URL('xlsx.full.min.js',location.href).href)});\n${definitions}\nself.onmessage=async({data})=>{try{const bytes=await data.file.arrayBuffer(),workbook=XLSX.read(bytes,{type:'array'}),rows=data.channel==='EDC'?prepareEdcWorkbookRows(workbook):prepareLivinWorkbookRows(workbook);const canonical=rows.map(row=>JSON.stringify(Object.fromEntries(Object.keys(row).sort().map(k=>[k,typeof row[k]==='string'?row[k].trim():row[k]])))).sort().join('\\n');const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical));const fingerprint=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');self.postMessage({result:mapImportedPerformance(rows,data.channel),fingerprint})}catch(error){self.postMessage({error:error.message||'File tidak valid'})}}`;
+  const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
+  return new Promise((resolve,reject)=>{const worker=new Worker(url);activeExcelWorker=worker;const finish=()=>{worker.terminate();URL.revokeObjectURL(url);if(activeExcelWorker===worker)activeExcelWorker=null};worker.onmessage=({data})=>{finish();data.error?reject(new Error(data.error)):resolve(data)};worker.onerror=()=>{finish();reject(new Error('Pembaca Excel gagal dijalankan. Muat ulang halaman dan coba lagi.'))};worker.postMessage({file,channel})});
+}
+function requestChannelReset(channel){
+  if(!currentUser||importSaving)return;channel=channel==='EDC'?'EDC':'LIVIN';const label=channel==='EDC'?'Merchant EDC':"Livin’ Merchant",drawer=document.getElementById('detailDrawer');
+  drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Reset data kanal</div><h2>Kosongkan ${label}?</h2><p>Data performance ${label} akan dikosongkan dari dashboard dan browser ini. Kanal lainnya tetap tersedia. File Excel asli tidak dihapus; Anda dapat mengupload ulang setelah reset.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="excel-confirm" style="margin-top:24px"><button class="primary" style="background:#b33f34" onclick="resetChannelData('${channel}',this)">Ya, kosongkan ${label}</button><button class="secondary" onclick="closeDrawer()">Batal</button></div>`;document.getElementById('drawerBackdrop').classList.add('open');
+}
+async function resetChannelData(channel,button){
+  if(!currentUser||importSaving)return;importSaving=true;button.disabled=true;try{const key=channel==='EDC'?'edc':'livin',store=performanceImportStore(),registered=registeredMerchantStore();store[key]=[];store.meta[key]={resetAt:new Date().toISOString(),rows:0};registered[key]=[];await MerchantDB.write(PERFORMANCE_IMPORT_KEY,store);await MerchantDB.write(REGISTERED_MERCHANTS_KEY,registered);const rows=channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS;rows.length=0;pendingExcelImport=null;refreshPortfolioSummary();closeDrawer();renderHome();openWorkspace(channel);showToast('Data kanal dikosongkan. Silakan upload Excel untuk mengisi kembali.','success','Reset berhasil')}catch(error){showToast(error.message||'Data gagal dikosongkan.','error')}finally{importSaving=false;button.disabled=false}
+}
 function performanceImportStore(){return MerchantDB.read(PERFORMANCE_IMPORT_KEY,{edc:[],livin:[],meta:{}})||{edc:[],livin:[],meta:{}}}
 function normalizeImportHeader(value){return String(value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')}
 function importValue(row,aliases){for(const alias of aliases){const key=normalizeImportHeader(alias);if(row[key]!==undefined&&row[key]!==null&&String(row[key]).trim()!=='')return row[key]}return ''}
@@ -1833,9 +1852,9 @@ function mapImportedPerformance(rows,channel){
 function openPerformanceImport(channel=currentKanal||'EDC'){
   if(!currentUser)return;channel=channel==='LIVIN'?'LIVIN':'EDC';pendingExcelImport=null;const drawer=document.getElementById('detailDrawer');drawer.innerHTML=`<div class="drawer-head"><div><div class="channel-label">Sumber data dashboard</div><h2>Upload Data Performance Excel</h2><p>Excel menjadi sumber utama merchant, Average Balance, dan Sales Volume.</p></div><button class="drawer-close" onclick="closeDrawer()">×</button></div><div class="register-channel"><button class="${channel==='EDC'?'active':''}" onclick="openPerformanceImport('EDC')">Data Merchant EDC</button><button class="${channel==='LIVIN'?'active':''}" onclick="openPerformanceImport('LIVIN')">Data Livin' Merchant</button></div><div class="excel-import"><div class="excel-requirements"><b>Format laporan asli didukung otomatis.</b> EDC menggabungkan sheet Detail Merchant dan Detail Funding berdasarkan rekening. Livin’ menghitung Average Balance dari growth dan persentase YoY.<br>Nilai yang kosong tetap masuk dengan status “belum tersedia”.</div><div class="excel-template-row"><button type="button" onclick="downloadPerformanceTemplate('${channel}')">Unduh template ${channel==='EDC'?'EDC':"Livin'"}</button></div><div class="excel-drop"><b>Pilih file Excel ${channel==='EDC'?'Merchant EDC':"Livin' Merchant"}</b><p>Format .xlsx, .xls, atau .csv. Struktur laporan asli maupun template sederhana dapat dibaca.</p><label>Pilih file<input type="file" accept=".xlsx,.xls,.csv" onchange="readPerformanceExcel(this.files[0],'${channel}')"></label></div><div id="excelImportResult"></div></div>`;document.getElementById('drawerBackdrop').classList.add('open');document.getElementById('quickMenu')?.classList.remove('open');
 }
-async function readPerformanceExcel(file,channel){const box=document.getElementById('excelImportResult');if(!file)return;try{box.innerHTML='<div class="excel-validation ok">Menyiapkan pembaca Excel…</div>';await ensureXlsx();box.innerHTML='<div class="excel-validation ok">Membaca dan memvalidasi file…</div>';const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'}),rows=channel==='EDC'?prepareEdcWorkbookRows(workbook):prepareLivinWorkbookRows(workbook),mapped=mapImportedPerformance(rows,channel);pendingExcelImport={channel,fileName:file.name,...mapped};renderPerformancePreview();showToast(`${mapped.valid.length} data valid siap diperiksa pada preview.`,'info','File berhasil dibaca')}catch(error){pendingExcelImport=null;box.innerHTML=`<div class="excel-validation bad">File tidak dapat dibaca: ${esc(error.message||'format tidak valid')}</div>`;showToast(error.message||'Format file Excel tidak valid.','error','Upload gagal')}}
+async function readPerformanceExcel(file,channel){const box=document.getElementById('excelImportResult');if(!file)return;const sequence=++excelReadSequence;activeExcelWorker?.terminate();pendingExcelImport=null;try{box.innerHTML='<div class="excel-validation ok" role="status">Membaca dan memvalidasi Excel di latar belakang. Halaman tetap dapat digunakan…</div>';const {result:mapped,fingerprint}=await processExcelInBackground(file,channel);if(sequence!==excelReadSequence||!box.isConnected)return;const key=channel==='EDC'?'edc':'livin';if(performanceImportStore().meta[key]?.fingerprint===fingerprint)throw new Error('Upload ditolak: isi data Excel sama dengan data yang sudah aktif, meskipun nama file berbeda.');pendingExcelImport={channel,fileName:file.name,fingerprint,...mapped};renderPerformancePreview();showToast(`${mapped.valid.length} data valid siap diperiksa pada preview.`,mapped.valid.length?'info':'error',mapped.valid.length?'File berhasil dibaca':'Tidak ada data valid')}catch(error){if(sequence!==excelReadSequence||!box.isConnected)return;pendingExcelImport=null;box.innerHTML=`<div class="excel-validation bad">${esc(error.message||'Format file tidak valid')}</div>`;showToast(error.message||'Format file Excel tidak valid.','error','Upload ditolak')}}
 function renderPerformancePreview(){const p=pendingExcelImport,box=document.getElementById('excelImportResult');if(!p||!box)return;const sample=p.valid.slice(0,8);box.innerHTML=`<div class="excel-preview-head"><b>Preview hasil konversi</b><span>${esc(p.fileName)}</span></div><div class="excel-validation ${p.valid.length?'ok':'bad'}">${p.valid.length} baris valid dari ${p.total}. ${p.errors.length?`${p.errors.length} baris dilewati.`:'Semua baris siap diproses.'}</div>${p.errors.length?`<div class="excel-validation bad">${p.errors.slice(0,5).map(esc).join('<br>')}${p.errors.length>5?'<br>…':''}</div>`:''}<div class="excel-import-table"><table><thead><tr><th>Nama Merchant</th><th>Rekening</th><th>Sales Volume</th><th>Average Balance</th></tr></thead><tbody>${sample.map(row=>{const x=p.channel==='EDC'?edcMetric(row):livinMetric(row);return `<tr><td>${esc(p.channel==='EDC'?row.merchant_name:row.store_name)}</td><td>${esc(row.account)}</td><td>${compact(x.sv)}</td><td>${compact(p.channel==='EDC'?x.avbal:x.implied)}</td></tr>`}).join('')}</tbody></table></div><div class="excel-confirm"><button class="primary" type="button" onclick="confirmPerformanceImport()" ${p.valid.length?'':'disabled'}>Gunakan ${p.valid.length} data di dashboard</button><button class="secondary" type="button" onclick="openPerformanceImport('${p.channel}')">Pilih file lain</button></div>`}
-async function confirmPerformanceImport(){const p=pendingExcelImport;if(!p||!p.valid.length)return showToast('Belum ada data valid yang dapat digunakan.','error','Import belum dapat dilanjutkan');try{const store=performanceImportStore(),key=p.channel==='EDC'?'edc':'livin';store[key]=p.valid;store.meta[key]={fileName:p.fileName,rows:p.valid.length,importedAt:new Date().toISOString()};await MerchantDB.write(PERFORMANCE_IMPORT_KEY,store);if(p.channel==='EDC')EDC_RELATIONSHIPS.splice(0,EDC_RELATIONSHIPS.length,...p.valid);else LIVIN_MERCHANTS.splice(0,LIVIN_MERCHANTS.length,...p.valid);refreshPortfolioSummary();addAudit('performance_excel_import',`${p.channel}: ${p.valid.length} baris dari ${p.fileName}`,p.channel);closeDrawer();renderHome();openWorkspace(p.channel);showToast(`${p.valid.length} data ${p.channel==='EDC'?'Merchant EDC':"Livin' Merchant"} aktif di dashboard.`,'success','Upload Excel berhasil')}catch(error){showToast(error.message||'Data Excel gagal disimpan.','error','Import gagal')}}
+async function confirmPerformanceImport(){const p=pendingExcelImport;if(importSaving)return;if(!p||!p.valid.length)return showToast('Belum ada data valid yang dapat digunakan.','error','Import belum dapat dilanjutkan');importSaving=true;const button=document.querySelector('.excel-confirm .primary');if(button){button.disabled=true;button.textContent='Menyimpan data…'}try{await new Promise(resolve=>setTimeout(resolve,30));const store=performanceImportStore(),key=p.channel==='EDC'?'edc':'livin';if(store.meta[key]?.fingerprint===p.fingerprint)throw new Error('Isi Excel ini sudah aktif. Upload duplikat ditolak.');store[key]=p.valid;store.meta[key]={fileName:p.fileName,fingerprint:p.fingerprint,rows:p.valid.length,importedAt:new Date().toISOString()};await MerchantDB.write(PERFORMANCE_IMPORT_KEY,store);const rows=p.channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS;rows.length=0;for(const row of p.valid)rows.push(row);refreshPortfolioSummary();addAudit('performance_excel_import',`${p.channel}: ${p.valid.length} baris dari ${p.fileName}`,p.channel);pendingExcelImport=null;closeDrawer();renderHome();openWorkspace(p.channel);showToast(`${p.valid.length} data ${p.channel==='EDC'?'Merchant EDC':"Livin' Merchant"} aktif di dashboard.`,'success','Upload Excel berhasil')}catch(error){showToast(error.message||'Data Excel gagal disimpan.','error','Import gagal')}finally{importSaving=false;if(button){button.disabled=false;button.textContent='Gunakan data di dashboard'}}}
 async function downloadPerformanceTemplate(channel){try{await ensureXlsx();const common={'Nama Merchant':'Contoh Merchant','Nomor Rekening':'1260012345678','Sales Volume YTD':500000000,'Average Balance':75000000,'Cabang':'Jakarta Falatehan','Kota Kabupaten':'Kota Jakarta Selatan','Nama Pemilik':'Nama Pemilik'};const row=channel==='EDC'?{...common,'MID':'71160000000','Jumlah EDC':1,'Sales Volume Previous':450000000}:{...common,'MID Static':'72260000000','MID Dynamic':'','Jenis Usaha':'Retail','Average Balance Previous':65000000};const ws=XLSX.utils.json_to_sheet([row]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,channel==='EDC'?'Data EDC':'Data Livin');XLSX.writeFile(wb,`template-performance-${channel.toLowerCase()}.xlsx`);showToast('Template Excel mulai diunduh.','success','Unduhan siap')}catch(error){showToast(error.message||'Template tidak dapat dibuat.','error')}}
 
 // ----- Database & portable backup -----
