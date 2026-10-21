@@ -4,7 +4,7 @@
   const local=window.MerchantDB;
   const originalReady=local.ready;
   const hosted=!['localhost','127.0.0.1','[::1]',''].includes(location.hostname)&&!new URLSearchParams(location.search).has('localBackup');
-  const sharedKeys=new Set(['mandiriMerchantPotentialV1','mandiriPerformanceExcelV1','mandiriRegisteredMerchantsV1','mandiriReportPeriodsV1']);
+  const sharedKeys=new Set(['mandiriMerchantPotentialV1','mandiriPerformanceExcelV1','mandiriRegisteredMerchantsV1','mandiriReportPeriodsV1','mandiriBusinessCategoriesV1']);
   const records=new Map(),versions={};
   const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
   let connected=false,busy=0,queue=Promise.resolve(),timer,user,online=false;

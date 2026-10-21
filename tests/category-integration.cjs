@@ -5,7 +5,7 @@ const elements={excelPreviewCategory:{value:'Kesehatan'},excelPreviewChannel:{va
 let captured;
 const ctx={MerchantCategories,console,Blob,EDC_RELATIONSHIPS:[{id:'e1',merchant_name:'Klinik A'}],LIVIN_MERCHANTS:[{key:'l1',store_name:'Kedai B',lob:'Rumah Makan'}],document:{getElementById:id=>elements[id],createElement:()=>({click(){}})},URL:{createObjectURL:blob=>{captured=blob;return 'local-test'},revokeObjectURL(){}},addAudit(){},showToast(){},esc:String};
 const noop=()=>'';
-for(const name of ['merchantRow','renderWorkspace','openWorkspace','renderEdcDetail','renderLivinDetail','renderHome','renderPriority','openExcelPreview','openMethodology'])ctx[name]=noop;
+for(const name of ['merchantRow','renderWorkspace','openWorkspace','openDetail','renderEdcDetail','renderLivinDetail','renderHome','renderPriority','openExcelPreview','openMethodology'])ctx[name]=noop;
 ctx.workspaceRows=()=>[{raw:ctx.EDC_RELATIONSHIPS[0]},{raw:ctx.LIVIN_MERCHANTS[0]}];
 ctx.merchantExcelRows=()=>[{channel:'EDC',id:'e1',name:'Klinik A'},{channel:'LIVIN',id:'l1',name:'Kedai B'}];
 ctx.excelPreviewSearchMatch=(row,query)=>row.name.toLowerCase().includes(query.toLowerCase());

@@ -15,7 +15,10 @@
   const categories=[...rules.map(r=>r[0]),'Multi bisnis','Lainnya','Belum terklasifikasi'];
   const normalize=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const generic=new Set(['edc','edc merchant','merchant','lainnya','other','others','unknown','na','n a']);
-  function classify(row){
+  function recordKey(row){return (Array.isArray(row.mids)||Object.hasOwn(row.totals||{},'edc')||(row.id&&!row.key)?'EDC':'LIVIN')+'::'+String(row.account||row.id||row.key||'')}
+  function classify(row,manual){
+    const chosen=manual===undefined?root.MerchantDB?.read('mandiriBusinessCategoriesV1',{})?.[recordKey(row)]?.category:manual;
+    if(categories.includes(chosen)&&chosen!=='Belum terklasifikasi')return {category:chosen,source:'Kategori dikonfirmasi manual',basis:'Pilihan kategori merchant tersimpan di database bersama'};
     const rawLobs=[row.lob,row.lob_lm,row.business_type,...(row.source_lobs||[])].filter(v=>v&&typeof v==='string').map(normalize).filter(v=>v&&!generic.has(v));
     const lobs=[...new Set(rawLobs)];
     // Mixed source businesses on one settlement account must not be forced into one type.
@@ -26,7 +29,7 @@
     const inferred=[...new Set(names.map(name=>rules.find(([,pattern])=>pattern.test(name))?.[0]).filter(Boolean))];
     return inferred.length?{category:inferred.length>1?'Multi bisnis':inferred[0],source:'Perkiraan dari nama',basis:'Perlu konfirmasi jenis usaha dari data sumber'}:{category:'Belum terklasifikasi',source:'Jenis usaha belum tersedia',basis:'Tidak ada jenis usaha atau kata kunci nama yang cukup jelas'};
   }
-  const api=Object.freeze({categories:Object.freeze(categories),classify});
+  const api=Object.freeze({categories:Object.freeze(categories),classify,recordKey});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.MerchantCategories=api;
 })(typeof window!=='undefined'?window:this);

@@ -1,0 +1,24 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const data={},handlers={},card={dataset:{}},select={value:'Kuliner',addEventListener(n,fn){handlers['select:'+n]=fn}},button={addEventListener(n,fn){handlers[n]=fn}},row={id:'old-id',account:'126001',merchant_name:'XYZ',mids:[]};
+let writes=0,refreshes=0;
+const ctx={currentUser:{role:'RM'},EDC_RELATIONSHIPS:[row],LIVIN_MERCHANTS:[],MerchantDB:{read:(key,fallback)=>structuredClone(data[key]||fallback),write:async(key,value)=>{writes++;data[key]=structuredClone(value)}},document:{getElementById:id=>({saveBusinessCategory:button,merchantBusinessCategory:select,potentialCard:card}[id])},esc:String,invalidateScores(){},refreshPotentialViews(){refreshes++},showToast(){}};
+ctx.window=ctx;
+for(const name of ['merchantRow','workspaceRows','renderWorkspace','openWorkspace','openDetail','renderEdcDetail','renderLivinDetail','renderHome','renderPriority','openExcelPreview','openMethodology','excelPreviewSearchMatch'])ctx[name]=()=>'';
+ctx.merchantExcelRows=()=>[{channel:'EDC',id:row.id,name:'XYZ'}];
+vm.createContext(ctx);
+for(const file of ['business-categories.js','category-ui.js'])vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'..',file),'utf8'),ctx);
+(async()=>{
+  assert.equal(ctx.MerchantCategories.classify(row).category,'Belum terklasifikasi');
+  ctx.openDetail('EDC',row.id);await handlers.click();
+  assert.equal(writes,1);assert.equal(refreshes,1);
+  assert.equal(ctx.MerchantCategories.classify(row).category,'Kuliner');
+  assert.equal(ctx.merchantExcelRows()[0].businessCategory,'Kuliner');
+  assert.equal(ctx.MerchantCategories.classify({...row,id:'reimport-id'}).category,'Kuliner');
+  assert.equal(ctx.MerchantCategories.classify({key:'livin-key',account:row.account,store_name:'XYZ'}).category,'Belum terklasifikasi');
+  select.value='invalid';await handlers.click();assert.equal(writes,1);
+  select.value='Jasa';card.dataset.dirty='true';await handlers.click();assert.equal(writes,1);
+  card.dataset.dirty='false';data.mandiriBusinessCategoriesV1['EDC::126001'].category='Kesehatan';await handlers.click();assert.equal(writes,1);
+  ctx.currentUser.role='BM';await handlers.click();assert.equal(writes,1);
+  assert.equal(row.lob,undefined);
+  console.log('Manual category: shared persistence, export, stable reimport account, channel isolation, validation, conflict, unsaved potential and role checks passed.');
+})().catch(error=>{console.error(error);process.exitCode=1});

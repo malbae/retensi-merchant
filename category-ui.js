@@ -3,7 +3,7 @@
   const categoryOf=row=>MerchantCategories.classify(row);
   const allRows=()=>[...EDC_RELATIONSHIPS.map(row=>({channel:'EDC',row})),...LIVIN_MERCHANTS.map(row=>({channel:'LIVIN',row}))];
   const badge=row=>{const c=categoryOf(row);return `<span class="business-badge" title="${esc(c.source)}">${esc(c.category)}</span>`};
-  const section=row=>{const c=categoryOf(row);return `<div class="detail-section business-profile"><h3>Kategori bisnis</h3><p>${badge(row)}</p><p>${esc(c.source)} · ${esc(c.basis)}</p><small>Kategori otomatis tidak mengubah jenis usaha asli atau perhitungan performance.</small></div>`};
+  const section=row=>{const c=categoryOf(row),editable=typeof currentUser!=='undefined'&&currentUser?.role==='RM';return `<div class="detail-section business-profile"><h3>Kategori bisnis</h3><p>${badge(row)}</p><p>${esc(c.source)} · ${esc(c.basis)}</p><p>Konfirmasi kategori untuk merchant yang belum terklasifikasi. Performance asli Excel tidak berubah. Simulasi potensi otomatis mengikuti kategori yang dipilih.</p><label for="merchantBusinessCategory">Pilih kategori bisnis</label><select id="merchantBusinessCategory" ${editable?'':'disabled'}><option value="">Pilih kategori…</option>${MerchantCategories.categories.filter(name=>name!=='Belum terklasifikasi').map(name=>`<option value="${esc(name)}" ${name===c.category?'selected':''}>${esc(name)}</option>`).join('')}</select><button id="saveBusinessCategory" type="button" class="primary" ${editable?'':'disabled'}>Simpan kategori</button><small>${editable?'Kategori tersimpan untuk merchant ini dan tersinkron ke perangkat lain.':'Kategori dapat diubah oleh RM / Sales.'}</small></div>`};
   const previousRow=merchantRow;
   merchantRow=function(o){return previousRow(o).replace('<div class="identity-cell">','<div class="identity-cell">'+badge(o.raw))};
   const previousRows=workspaceRows;
@@ -22,6 +22,29 @@
   const previousEdc=renderEdcDetail,previousLivin=renderLivinDetail;
   renderEdcDetail=function(row){return previousEdc(row)+section(row)};
   renderLivinDetail=function(row){return previousLivin(row)+section(row)};
+  const previousDetail=openDetail;
+  openDetail=function(channel,key){
+    previousDetail(channel,key);
+    const row=(channel==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS).find(r=>(channel==='EDC'?r.id:r.key)===key),button=document.getElementById('saveBusinessCategory'),select=document.getElementById('merchantBusinessCategory');
+    if(!row||!button||!select)return;
+    const recordKey=MerchantCategories.recordKey(row),storeKey='mandiriBusinessCategoriesV1',initial=JSON.stringify(MerchantDB.read(storeKey,{})[recordKey]||null);
+    select.addEventListener('change',()=>{const card=document.getElementById('potentialCard');if(card)card.dataset.categoryDirty='true'});
+    button.addEventListener('click',async()=>{
+      if(currentUser?.role!=='RM')return;
+      button.disabled=true;
+      try{
+        if(!MerchantCategories.categories.includes(select.value)||select.value==='Belum terklasifikasi')throw new Error('Pilih kategori bisnis terlebih dahulu.');
+        if(document.getElementById('potentialCard')?.dataset.dirty==='true')throw new Error('Simpan perubahan potensi terlebih dahulu, lalu simpan kategori.');
+        const store=MerchantDB.read(storeKey,{});
+        if(JSON.stringify(store[recordKey]||null)!==initial)throw new Error('Kategori telah diubah pengguna lain. Buka ulang detail sebelum menyimpan.');
+        store[recordKey]={category:select.value,updatedAt:new Date().toISOString()};
+        await MerchantDB.write(storeKey,store);
+        invalidateScores();refreshPotentialViews();openDetail(channel,key);
+        showToast('Kategori bisnis tersimpan dan tersedia bagi pengguna lain.','success','Kategori tersimpan');
+      }catch(error){showToast(error.message||'Kategori belum dapat disimpan.','error','Gagal menyimpan kategori')}
+      finally{button.disabled=false}
+    });
+  };
   const previousHome=renderHome;
   const previousPriority=renderPriority;
   renderPriority=function(){previousPriority();const rows=topLivinPriorities();document.querySelectorAll('#featureCard .priority-name').forEach((el,index)=>{if(rows[index])el.insertAdjacentHTML('beforeend',badge(rows[index].l))})};

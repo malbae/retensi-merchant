@@ -1,4 +1,4 @@
-const SHARED_KEYS = new Set(['mandiriMerchantPotentialV1', 'mandiriPerformanceExcelV1', 'mandiriRegisteredMerchantsV1', 'mandiriReportPeriodsV1']);
+const SHARED_KEYS = new Set(['mandiriMerchantPotentialV1', 'mandiriPerformanceExcelV1', 'mandiriRegisteredMerchantsV1', 'mandiriReportPeriodsV1', 'mandiriBusinessCategoriesV1']);
 const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
 let certCache;
 function json(body, status = 200) { return new Response(JSON.stringify(body), {status, headers: {'Content-Type':'application/json', 'Cache-Control':'no-store'}}); }
@@ -75,6 +75,7 @@ export async function onRequest({request,env,params}) {
       const input=JSON.parse(text);
       if(!SHARED_KEYS.has(input.key)||!Array.isArray(input.changes)||input.changes.length>10000) return json({error:'Data tidak valid.'},400);
       if (input.key==='mandiriMerchantPotentialV1' && user.role!=='RM') return json({error:'Hanya RM / Sales yang dapat mengubah potensi merchant.'},403);
+      if (input.key==='mandiriBusinessCategoriesV1' && user.role!=='RM') return json({error:'Hanya RM / Sales yang dapat mengubah kategori bisnis.'},403);
       for(let attempt=0;attempt<4;attempt++) {
         const old=await env.DB.prepare('SELECT value,version FROM shared_records WHERE key=?').bind(input.key).first();
         const value=mergeChanges(old?JSON.parse(old.value):{},input.changes),version=(old?.version||0)+1,time=new Date().toISOString();
