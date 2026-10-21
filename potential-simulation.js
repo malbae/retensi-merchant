@@ -62,7 +62,7 @@
   }
   function editStatus(saved){
     const edited=!!saved&&(['real','assumption'].includes(saved.basis)||(saved.basis==='category'&&!!saved.simulation&&typeof saved.simulation==='object'));
-    return {final:edited,label:edited?'Sudah diedit final':'Estimasi otomatis'};
+    return {final:edited,label:edited?'Sudah diedit final':'Belum diedit'};
   }
   const api=Object.freeze({presets,locations,categoryPatterns,location,calendar,suggest,effective,simulationInputs,summarizeGaps,editStatus});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MerchantSimulation=api;

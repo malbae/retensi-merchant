@@ -1,5 +1,6 @@
 const assert=require('node:assert/strict'),sim=require('../potential-simulation.js');
 assert.equal(sim.editStatus(undefined).final,false);
+assert.equal(sim.editStatus(undefined).label,'Belum diedit');
 assert.equal(sim.editStatus({}).final,false);
 assert.equal(sim.editStatus({basis:'real',realRevenue:0}).label,'Sudah diedit final');
 assert.equal(sim.editStatus({basis:'assumption',visitors:10}).final,true);

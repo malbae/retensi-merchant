@@ -994,7 +994,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 @media(min-width:521px) and (max-width:760px){.merchant-row{grid-template-columns:minmax(0,1.4fr) minmax(90px,1fr) 38px;grid-template-areas:"identity potential action" "avbal potential action" "gap potential action"}.merchant-row .metric-sv,.merchant-row .metric-retention{display:none}.identity-cell{grid-area:identity}.metric-avbal{grid-area:avbal}.metric-gap{grid-area:gap}.metric-potential{grid-area:potential}.row-open{grid-area:action}}
 @media(max-width:520px){.merchant-row{grid-template-areas:"identity action" "avbal action" "gap action" "potential action"}.metric-potential{grid-area:potential;border-top:1px solid #e6edf1;padding-top:8px}.metric-potential small{display:inline-block;margin-right:7px}.metric-potential>b{display:inline-block}.metric-potential em{display:inline-block;margin-left:7px}.potential-rank{margin-left:7px}}
 </style>
-<link rel="stylesheet" href="readability.css?v=finalstatus1">
+<link rel="stylesheet" href="readability.css?v=editgroups1">
 </head>
 <body>
 <button id="sharedConnectionStatus" type="button" onclick="refreshSharedData(this)" style="position:fixed;bottom:10px;left:10px;z-index:9000;max-width:calc(100vw - 20px);display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #dce6ed;border-radius:8px;padding:6px 9px;color:#647d8d;font-size:14px;box-shadow:0 2px 8px #1231;cursor:pointer" title="Refresh data" aria-label="Refresh data"><span aria-hidden="true">↻</span><time id="sharedLastSync">—</time></button>
@@ -1112,6 +1112,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
           <div class="list-top">
             <div><h3 id="listHeading">Prioritas Merchant</h3><p id="listSubheading">Prioritas berdasarkan gap pendanaan menuju target akhir 20%.</p></div>
             <label class="business-filter">Kategori bisnis<select id="businessCategoryFilter" onchange="renderWorkspace(true)" aria-label="Filter kategori bisnis"><option value="">Semua kategori</option></select></label>
+            <label class="business-filter">Status penyuntingan<select id="potentialEditFilter" onchange="renderWorkspace(true)" aria-label="Filter status penyuntingan"><option value="">Semua status</option><option value="final">Sudah diedit final</option><option value="unedited">Belum diedit</option></select></label>
             <select class="sort-select" id="sortSelect" onchange="renderWorkspace(true)">
               <option value="gap">Gap pendanaan terbesar</option>
               <option value="potential">Ranking potensi SV YTD tertinggi</option>
@@ -1135,7 +1136,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 </div>
 
 <script src="business-categories.js?v=manualcategory1"></script>
-<script src="potential-simulation.js?v=finalstatus1"></script>
+<script src="potential-simulation.js?v=editgroups1"></script>
 <script src="database.js?v=central2"></script>
 <script src="shared-database.js?v=manualcategory1"></script>
 <script>
@@ -1921,7 +1922,7 @@ document.addEventListener('merchantdb:offline',()=>{if(typeof showToast==='funct
 MerchantDB.ready.then(()=>{if(MerchantDB.status()==='shared'){EDC_RELATIONSHIPS.length=0;LIVIN_MERCHANTS.length=0}loadRegisteredMerchants()}).catch(()=>{document.getElementById('loginError').textContent='Database pusat belum tersedia. Muat ulang halaman setelah koneksi kembali.'});
 </script>
 
-<script src="category-ui.js?v=finalstatus1"></script>
-<script src="simulation-ui.js?v=finalstatus1"></script>
+<script src="category-ui.js?v=editgroups1"></script>
+<script src="simulation-ui.js?v=editgroups1"></script>
 </body>
 </html>

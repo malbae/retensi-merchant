@@ -42,6 +42,10 @@
   const previousExport=merchantExcelRows;
   merchantExcelRows=function(){return previousExport().map(row=>{const raw=find(row.channel,row.id);if(!raw)return row;const p=effective(row.channel,raw),actual=(row.channel==='EDC'?edcMetric(raw):livinMetric(raw)).sv;return {...row,potentialBasis:p.basis+' · '+p.editStatus.label,monthlyCashflow:p.cashflowMonthly,annualCashflow:p.cashflowYtd,potentialSvYtd:p.ytd,potentialSvGap:actual===null||p.ytd===null?null:Math.max(p.ytd-actual,0),potentialLocation:p.simulated?p.locationLabel:'Input manual',potentialLocationSource:p.simulated?p.patternBasis+' · '+p.place.locationText:'',potentialWeekday:p.simulated?p.inputs.weekdayVisitors:'',potentialWeekend:p.simulated?p.inputs.weekendVisitors:'',potentialTicket:p.simulated?p.inputs.ticket:'',potentialWeekdayDays:p.simulated?p.days.weekday:'',potentialWeekendDays:p.simulated?p.days.weekend:'',potentialCapture:p.simulated?p.inputs.share:'',potentialUnits:p.simulated?p.inputs.units:''}})};
   const previousWorkspace=renderWorkspace;
+  const previousWorkspaceRows=workspaceRows;
+  workspaceRows=function(){const status=document.getElementById('potentialEditFilter')?.value||'';return previousWorkspaceRows().filter(row=>!status||MerchantSimulation.editStatus(saved(currentKanal,row.key)).final===(status==='final'))};
+  const previousOpenWorkspace=openWorkspace;
+  openWorkspace=function(channel){const filter=document.getElementById('potentialEditFilter');if(filter)filter.value='';return previousOpenWorkspace(channel)};
   const gapCard=(title,summary,period)=>`<article class="potential-gap-card"><h3>${title}</h3><strong>${compact(summary.total)}</strong><span>${rupiah(summary.total)}</span><p>${period} · ${summary.covered} dari ${summary.count} merchant/relasi dihitung${summary.missing?` · ${summary.missing} belum tersedia`:''}</p></article>`;
   const previousHome=renderHome;
   renderHome=function(){
@@ -53,7 +57,10 @@
   };
   const previousRow=merchantRow;
   merchantRow=function(o){const p=effective(currentKanal,o.raw);const html=previousRow(o).replace('<div class="identity-cell">','<div class="identity-cell">'+statusBadge(currentKanal,o.key));return currentKanal==='EDC'&&p.simulated&&!p.available?html.replace('Belum diisi','Menunggu jumlah mesin EDC'):html};
-  renderWorkspace=function(reset){previousWorkspace(reset);document.getElementById('listSubheading').textContent+=' · Potensi berlabel estimasi adalah skenario asumsi, bukan omzet aktual.';
+  renderWorkspace=function(reset){
+    const rawRows=currentKanal==='EDC'?EDC_RELATIONSHIPS:LIVIN_MERCHANTS,finalCount=rawRows.filter(row=>MerchantSimulation.editStatus(saved(currentKanal,currentKanal==='EDC'?row.id:row.key)).final).length,filter=document.getElementById('potentialEditFilter');
+    if(filter){filter.options[0].textContent='Semua status ('+rawRows.length+')';filter.options[1].textContent='Sudah diedit final ('+finalCount+')';filter.options[2].textContent='Belum diedit ('+(rawRows.length-finalCount)+')'}
+    previousWorkspace(reset);document.getElementById('listSubheading').textContent+=' · Potensi adalah perhitungan asumsi, bukan omzet aktual. Sudah diedit final: '+finalCount+' · Belum diedit: '+(rawRows.length-finalCount)+'.';
     const keys=new Set(workspaceRows().map(r=>r.key));
     const rows=merchantExcelRows().filter(r=>r.channel===currentKanal&&keys.has(r.id));
     document.getElementById('potentialGapRail')?.remove();
