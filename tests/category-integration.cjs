@@ -1,0 +1,37 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const path=require('node:path'),MerchantCategories=require('../business-categories.js');
+const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const elements={excelPreviewCategory:{value:'Kesehatan'},excelPreviewChannel:{value:'ALL'},excelPreviewSearch:{value:''},businessCategoryFilter:{value:''}};
+let captured;
+const ctx={MerchantCategories,console,Blob,EDC_RELATIONSHIPS:[{id:'e1',merchant_name:'Klinik A'}],LIVIN_MERCHANTS:[{key:'l1',store_name:'Kedai B',lob:'Rumah Makan'}],document:{getElementById:id=>elements[id],createElement:()=>({click(){}})},URL:{createObjectURL:blob=>{captured=blob;return 'local-test'},revokeObjectURL(){}},addAudit(){},showToast(){},esc:String};
+const noop=()=>'';
+for(const name of ['merchantRow','renderWorkspace','openWorkspace','renderEdcDetail','renderLivinDetail','renderHome','renderPriority','openExcelPreview','openMethodology'])ctx[name]=noop;
+ctx.workspaceRows=()=>[{raw:ctx.EDC_RELATIONSHIPS[0]},{raw:ctx.LIVIN_MERCHANTS[0]}];
+ctx.merchantExcelRows=()=>[{channel:'EDC',id:'e1',name:'Klinik A'},{channel:'LIVIN',id:'l1',name:'Kedai B'}];
+ctx.excelPreviewSearchMatch=(row,query)=>row.name.toLowerCase().includes(query.toLowerCase());
+ctx.window=ctx;vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname,'../category-ui.js'),'utf8'),ctx);
+assert.equal(ctx.merchantExcelRows()[0].businessCategory,'Kesehatan');
+assert.equal(ctx.merchantExcelRows()[1].businessCategory,'Kuliner');
+assert.equal(ctx.filteredBusinessExcelRows().length,1);
+assert.equal(ctx.filteredBusinessExcelRows()[0].id,'e1');
+elements.businessCategoryFilter.value='Kuliner';assert.equal(ctx.workspaceRows().length,1);
+assert.equal(ctx.workspaceRows()[0].raw.key,'l1');
+elements.excelPreviewSearch.value='kesehatan';assert.equal(ctx.filteredBusinessExcelRows().length,1);
+elements.excelPreviewSearch.value='not found';assert.equal(ctx.filteredBusinessExcelRows().length,0);
+elements.excelPreviewSearch.value='';
+function source(name){const start=html.indexOf('function '+name+'('),tail=html.slice(start),next=tail.slice(10).search(/\n(?:async )?function /);assert(start>=0);return next<0?tail:tail.slice(0,next+10)}
+for(const name of ['excelXmlEscape','excelCell','exportDatabaseExcel'])vm.runInContext(source(name),ctx);
+ctx.exportDatabaseExcel();
+captured.text().then(xml=>{
+  assert(xml.includes('Kategori Bisnis'));
+  assert(xml.includes('Dasar Kategori'));
+  assert(xml.includes('Kesehatan'));
+  assert(!xml.includes('Kedai B'));
+  assert(xml.includes('R2C39'));
+  const rows=xml.match(/<Row(?: [^>]*)?>[\s\S]*?<\/Row>/g);
+  assert.equal(rows.length,2);
+  for(const row of rows)assert.equal((row.match(/<Cell\b/g)||[]).length,39);
+  assert.equal((xml.match(/<Column\b/g)||[]).length,39);
+  console.log('Category integration: shared classifier, list filter, export/search filter and 39-column XML alignment passed.');
+}).catch(error=>{console.error(error);process.exitCode=1});

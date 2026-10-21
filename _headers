@@ -8,3 +8,7 @@
   Cache-Control: no-store, max-age=0
 /canonical.js
   Cache-Control: no-store, max-age=0
+/business-categories.js
+  Cache-Control: no-store, max-age=0
+/category-ui.js
+  Cache-Control: no-store, max-age=0

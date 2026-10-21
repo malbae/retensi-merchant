@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const categories=require('../business-categories.js');
+const classify=row=>categories.classify(row);
+assert.equal(classify({lob:'Salon Kecantikan',store_name:'Toko A'}).category,'Kecantikan');
+assert.equal(classify({lob:'Supermarket/Minimarket',store_name:'Ayam'}).category,'Retail & Perdagangan');
+assert.equal(classify({merchant_name:'INTIBIOS LAB KLINIK & FARMASI'}).category,'Kesehatan');
+assert.equal(classify({merchant_name:'BAKSO SATRIO'}).category,'Kuliner');
+assert.equal(classify({lob:'EDC Merchant',merchant_name:'SHIGERU'}).source,'Perkiraan dari nama');
+assert.equal(classify({merchant_name:'PT ABC'}).category,'Belum terklasifikasi');
+assert.equal(classify({lob:'Lini bisnis baru'}).category,'Lainnya');
+assert.equal(classify({source_lobs:['Salon Kecantikan','Rumah Makan']}).category,'Multi bisnis');
+assert.equal(classify({lob:'Layanan Kurir'}).category,'Transportasi & Logistik');
+assert.equal(classify({lob:'Hotel/Motel/Resor'}).category,'Perhotelan & Hiburan');
+assert.equal(classify({lob:'Toko Aksesoris',owner_name:'Dokter A'}).category,'Retail & Perdagangan');
+assert.equal(classify({merchant_name:'DENTALCAREXYZ'}).category,'Belum terklasifikasi');
+const raw={lob:'Salon',store_name:'A'},copy=JSON.stringify(raw);classify(raw);assert.equal(JSON.stringify(raw),copy);
+assert.equal(new Set(categories.categories).size,categories.categories.length);
+console.log('Business categories: LOB priority, name fallback, boundaries, mixed accounts, unknown and immutability passed.');
