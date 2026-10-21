@@ -1,0 +1,17 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const categories=require('../business-categories.js'),simulation=require('../potential-simulation.js');
+const rows=[{id:'a',merchant_name:'Cafe A',lob:'Restoran'},{id:'b',merchant_name:'Cafe B',lob:'Restoran'}];
+const inputs={'EDC::b':{basis:'real',realRevenue:100000000}};
+const ctx={MerchantCategories:categories,MerchantSimulation:simulation,EDC_RELATIONSHIPS:rows,LIVIN_MERCHANTS:[],potentialRankingCache:new Map(),readPotentialStore:()=>inputs,potentialStoreKey:(ch,key)=>ch+'::'+key,getReportPeriod:()=>({year:2026,month:10}),edcMetric:()=>({sv:1000000}),livinMetric:()=>({sv:0})};
+for(const n of ['potentialSection','initPotentialForm','renderWorkspace','openMethodology','openDetail'])ctx[n]=()=>'';
+ctx.merchantExcelRows=()=>rows.map(r=>({channel:'EDC',id:r.id}));
+vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../simulation-ui.js'),'utf8'),ctx);
+const ranked=ctx.potentialVolumeRankings('EDC');
+assert.equal(ranked.size,2);assert.equal(ranked.get('b').ytd,1000000000);assert.equal(ranked.get('b').simulated,false);
+assert.equal(ranked.get('a').simulated,true);assert(ranked.get('a').basis.includes('otomatis'));
+const exported=ctx.merchantExcelRows();assert.equal(exported[0].potentialSvYtd,ranked.get('a').ytd);
+assert.equal(exported[1].potentialSvYtd,ranked.get('b').ytd);
+assert.equal(exported[0].potentialSvGap,Math.max(ranked.get('a').ytd-1000000,0));
+assert.equal(inputs['EDC::a'],undefined);
+const actual=JSON.stringify(rows);ctx.potentialRankingCache.clear();ctx.potentialVolumeRankings('EDC');assert.equal(JSON.stringify(rows),actual);
+console.log('Simulation integration: ranking/export equality, manual priority, no implicit writes and actual data preservation passed.');

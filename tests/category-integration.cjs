@@ -28,10 +28,10 @@ captured.text().then(xml=>{
   assert(xml.includes('Dasar Kategori'));
   assert(xml.includes('Kesehatan'));
   assert(!xml.includes('Kedai B'));
-  assert(xml.includes('R2C39'));
+  assert(xml.includes('R2C50'));
   const rows=xml.match(/<Row(?: [^>]*)?>[\s\S]*?<\/Row>/g);
   assert.equal(rows.length,2);
-  for(const row of rows)assert.equal((row.match(/<Cell\b/g)||[]).length,39);
-  assert.equal((xml.match(/<Column\b/g)||[]).length,39);
-  console.log('Category integration: shared classifier, list filter, export/search filter and 39-column XML alignment passed.');
+  for(const row of rows)assert.equal((row.match(/<Cell\b/g)||[]).length,50);
+  assert.equal((xml.match(/<Column\b/g)||[]).length,50);
+  console.log('Category integration: shared classifier, list filter, export/search filter and 50-column XML alignment passed.');
 }).catch(error=>{console.error(error);process.exitCode=1});

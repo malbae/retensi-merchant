@@ -12,3 +12,7 @@
   Cache-Control: no-store, max-age=0
 /category-ui.js
   Cache-Control: no-store, max-age=0
+/potential-simulation.js
+  Cache-Control: no-store, max-age=0
+/simulation-ui.js
+  Cache-Control: no-store, max-age=0
