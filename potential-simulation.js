@@ -18,7 +18,7 @@
     return {type:shopping&&!office?'shopping':office&&!shopping?'office':'neutral',address,locationText:[address,raw.kecamatan,raw.kabupaten,raw.provinsi].filter(Boolean).join(', ')||'Lokasi belum tersedia',basis:shopping!==office?'Petunjuk dari teks alamat; belum diverifikasi':'Tidak ada petunjuk kawasan yang cukup jelas'};
   }
   function calendar(year,month,openDays){
-    if(!Number.isInteger(year)||year<1900||year>2200||!Number.isInteger(month)||month<1||month>12)throw new Error('Periode simulasi tidak valid');
+    if(!Number.isInteger(year)||year<1900||year>2200||!Number.isInteger(month)||month<1||month>12)throw new Error('Periode estimasi tidak valid');
     let weekday=0,weekend=0;
     for(let m=0;m<month;m++)for(let d=1;d<=new Date(Date.UTC(year,m+1,0)).getUTCDate();d++){
       const day=new Date(Date.UTC(year,m,d)).getUTCDay();if(!openDays.includes(day))continue;
@@ -39,9 +39,9 @@
     const weekdayCashflow=days.weekday*inputs.weekdayVisitors*inputs.ticket*inputs.units,weekendCashflow=days.weekend*inputs.weekendVisitors*inputs.ticket*inputs.units;
     const cashflowYtd=weekdayCashflow+weekendCashflow,cashflowMonthly=((days.weekday-previous.weekday)*inputs.weekdayVisitors+(days.weekend-previous.weekend)*inputs.weekendVisitors)*inputs.ticket*inputs.units;
     const ytd=cashflowYtd*inputs.share/100,monthly=cashflowMonthly*inputs.share/100;
-    if(![ytd,monthly,cashflowYtd,cashflowMonthly].every(Number.isFinite))throw new Error('Angka simulasi terlalu besar');
+    if(![ytd,monthly,cashflowYtd,cashflowMonthly].every(Number.isFinite))throw new Error('Angka estimasi terlalu besar');
     const available=!machineBased||machineCount>0;
-    return {inputs,days,category,place,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?'Otomatis kategori '+category+' · ':'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?'Skenario mengikuti kategori bisnis, bukan bukti kawasan aktual':'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Simulasi per mesin EDC':'Simulasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
+    return {inputs,days,category,place,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?'Otomatis kategori '+category+' · ':'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?'Skenario mengikuti kategori bisnis, bukan bukti kawasan aktual':'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Estimasi per mesin EDC':'Estimasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
   }
   function effective(raw,category,period,saved){
     if(saved&&saved.basis!=='category'){
@@ -60,6 +60,10 @@
     const available=rows.filter(r=>typeof r.potentialSvGap==='number'&&Number.isFinite(r.potentialSvGap)&&r.potentialSvGap>=0);
     return {total:available.length?available.reduce((sum,r)=>sum+r.potentialSvGap,0):null,covered:available.length,missing:rows.length-available.length,count:rows.length};
   }
-  const api=Object.freeze({presets,locations,categoryPatterns,location,calendar,suggest,effective,simulationInputs,summarizeGaps});
+  function editStatus(saved){
+    const edited=!!saved&&(['real','assumption'].includes(saved.basis)||(saved.basis==='category'&&!!saved.simulation&&typeof saved.simulation==='object'));
+    return {final:edited,label:edited?'Sudah diedit final':'Estimasi otomatis'};
+  }
+  const api=Object.freeze({presets,locations,categoryPatterns,location,calendar,suggest,effective,simulationInputs,summarizeGaps,editStatus});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MerchantSimulation=api;
 })(typeof window!=='undefined'?window:this);

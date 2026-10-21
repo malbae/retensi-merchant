@@ -1,4 +1,10 @@
 const assert=require('node:assert/strict'),sim=require('../potential-simulation.js');
+assert.equal(sim.editStatus(undefined).final,false);
+assert.equal(sim.editStatus({}).final,false);
+assert.equal(sim.editStatus({basis:'real',realRevenue:0}).label,'Sudah diedit final');
+assert.equal(sim.editStatus({basis:'assumption',visitors:10}).final,true);
+assert.equal(sim.editStatus({basis:'category',simulation:{weekdayVisitors:10}}).final,true);
+assert.equal(sim.editStatus({basis:'category'}).final,false);
 assert.deepEqual(sim.summarizeGaps([{potentialSvGap:100},{potentialSvGap:0},{potentialSvGap:50},{potentialSvGap:null},{potentialSvGap:NaN}]),{total:150,covered:3,missing:2,count:5});
 assert.equal(sim.summarizeGaps([]).total,null);
 assert.equal(sim.summarizeGaps([{potentialSvGap:null}]).total,null);
