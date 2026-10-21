@@ -11,40 +11,43 @@
     ['Retail & Perdagangan','Kamera & optik premium',/\b(leica|kamera|camera|tirta sapta semesta)\b/,[5000000,75000000],.2],
     ['Retail & Perdagangan','Jam tangan',/\b(watch|watches|arloji)\b/,[500000,10000000],1],
     ['Retail & Perdagangan','Komputer & elektronik',/\b(komputer|computer|elektronik|celluler|cellular|ponsel)\b/,[500000,12000000],3],
-    ['Retail & Perdagangan','Supermarket / minimarket',/\b(supermarket|minimarket)\b/,[50000,250000],80],
+    ['Retail & Perdagangan','Supermarket',/\b(supermarket|hypermarket)\b/,[75000,350000],90],
+    ['Retail & Perdagangan','Minimarket',/\b(minimarket)\b/,[25000,125000],60],
     ['Retail & Perdagangan','Kelontong / sembako',/\b(kelontong|sembako)\b/,[20000,100000],40],
     ['Retail & Perdagangan','Busana & tekstil',/\b(fashion|batik|tenun|pakaian|boutique|butik|sankalpa)\b/,[75000,500000],10],
     ['Retail & Perdagangan','Bahan bangunan & perlengkapan',/\b(bangunan|elektrik|electric|hardware)\b|^tb\s/,[100000,2000000],8],
     ['Kecantikan','Perawatan estetika',/\b(aesthetic|estetika|skincare|beaute)\b/,[200000,2000000],5],
-    ['Kecantikan','Salon & barbershop',/\b(salon|barber|barbershop)\b/,[30000,200000],12],
+    ['Kecantikan','Barbershop',/\b(barber|barbershop)\b/,[25000,100000],18],
+    ['Kecantikan','Salon',/\b(salon)\b/,[50000,300000],10],
     ['Kesehatan','Layanan gigi',/\b(drg|dental|gigi)\b/,[150000,1500000],6],
     ['Kesehatan','Laboratorium & pemeriksaan',/\b(lab|laboratorium|intibios|inti bios)\b/,[100000,800000],12],
+    ['Kesehatan','Apotek',/\b(apotek|apotik|pharmacy|farmasi)\b/,[25000,200000],40],
+    ['Kesehatan','Rumah sakit',/\b(rumah sakit|hospital)\b/,[150000,2000000],30],
+    ['Kesehatan','Klinik',/\b(klinik|clinic)\b/,[100000,500000],15],
+    ['Pendidikan','Pembayaran kursus / pendidikan',/\b(kursus|sekolah|school|bimbel|pendidikan)\b/,[300000,3000000],1],
     ['Otomotif','Cuci & detailing kendaraan',/\b(carwash|car wash|detailing|coating|prestige max care)\b/,[50000,500000],10],
     ['Otomotif','Bengkel & suku cadang',/\b(bengkel|garage|auto|motor|mobil|battery|aki|bmw)\b/,[100000,2000000],5],
     ['Perhotelan & Hiburan','Lapangan padel / olahraga',/\b(padel|gym|fitness|olahraga)\b/,[150000,400000],6],
     ['Perhotelan & Hiburan','Akomodasi hotel',/\b(hotel|resort|penginapan|arifindo|estrella)\b/,[300000,1500000],5],
     ['Transportasi & Logistik','Sewa kendaraan',/\b(rent car|rental|sewa mobil)\b/,[300000,1200000],2]
   ];
-  const positive=value=>value!==null&&value!==undefined&&String(value).trim()!==''&&Number.isFinite(Number(value))&&Number(value)>0;
   function build(raw,category,period,units,days,factors,fallback){
     const text=[raw.merchant_name,raw.store_name,raw.lob,...(raw.source_lobs||[]),...(raw.dba_names||[]),...(raw.official_names||[])].filter(Boolean).join(' ').toLowerCase();
     const type=types.find(([cat,,pattern])=>cat===category&&pattern.test(text));
     const label=type?.[1]||'Profil umum · '+category,range=type?.[3]||[fallback[1]*.7,fallback[1]*1.3],baseFrequency=type?.[4]??fallback[0];
-    const sv=raw.totals?raw.totals.sv26:raw.sum_sv_ytd_stat_din??raw.sv_ytd,count=raw.totals?.trx26;
-    const ticket=positive(sv)&&positive(count)?Number(sv)/Number(count):(range[0]+range[1])/2;
-    const weightedDays=days.weekday*factors.weekday+days.weekend*factors.weekend;
-    const knownZero=sv!==null&&sv!==undefined&&String(sv).trim()!==''&&Number(sv)===0;
-    const observedCount=knownZero?0:positive(count)?Number(count):positive(sv)?Number(sv)/ticket:null;
-    // The imported count/SV is already aggregated. Divide by EDC units before modelling per-machine inputs.
-    const base=observedCount!==null&&weightedDays>0&&units>0?observedCount/weightedDays/units:baseFrequency;
-    const monthlySv=positive(sv)?Number(sv)/period.month:null;
+    const ticket=(range[0]+range[1])/2;
+    const edc=Array.isArray(raw.mids)||Object.hasOwn(raw.totals||{},'edc');
+    // Independent capacity scenario. Multiple terminals are NOT evidence of multiple stores.
+    // Aggregate EDC capacity scales by sqrt(terminals); divide back to expose per-machine inputs.
+    const capacityFactor=edc?Math.sqrt(Math.max(1,units)):Math.max(1,units);
+    const base=baseFrequency*capacityFactor/Math.max(1,units);
     return {label,priceLow:range[0],priceHigh:range[1],ticket,weekday:base*factors.weekday,weekend:base*factors.weekend,
-      ticketBasis:positive(sv)&&positive(count)?'SV aktual ÷ jumlah transaksi aktual Excel':'Titik tengah kisaran asumsi profil; belum merupakan harga merchant terverifikasi',
-      frequencyBasis:observedCount!==null?(positive(count)?'Frekuensi diturunkan dari jumlah transaksi YTD Excel':'Frekuensi perkiraan = SV YTD ÷ asumsi nilai transaksi'):'Frekuensi contoh profil; belum ada acuan performance yang memadai',
-      scale:monthlySv===null?'Skala kanal belum diketahui':monthlySv<50000000?'Volume kanal relatif rendah':monthlySv<500000000?'Volume kanal menengah':'Volume kanal relatif tinggi',
-      scaleBasis:'Kelompok internal dari SV bulanan rata-rata (<Rp50 juta, Rp50–500 juta, ≥Rp500 juta), bukan klasifikasi resmi UMKM atau ukuran seluruh bisnis',
-      anchored:observedCount!==null,units,referenceSv:positive(sv)?Number(sv):null,
-      warning:'Harga merupakan rentang asumsi, bukan seluruh harga katalog. Pola weekday/weekend belum terverifikasi. Tanpa porsi kanal terukur, hasil bukan bukti total omzet usaha atau jaminan pertumbuhan.'};
+      ticketBasis:'Titik tengah kisaran asumsi produk/jasa, bukan SV aktual ÷ transaksi',
+      frequencyBasis:'Frekuensi kapasitas profil '+baseFrequency+' transaksi/hari dasar × faktor kapasitas '+capacityFactor.toLocaleString('id-ID',{maximumFractionDigits:2})+(edc?' ÷ '+units+' mesin untuk input per mesin':''),
+      scale:units>1?(edc?'Multi-mesin · kapasitas bertahap':'Multi-unit usaha'):(edc?'Satu mesin EDC · kapasitas profil':'Satu unit usaha · kapasitas profil'),
+      scaleBasis:edc?'Faktor kapasitas = akar jumlah mesin EDC; asumsi internal agar mesin tidak dianggap toko. Bukan ukuran bisnis terverifikasi.':'Kapasitas profil per unit usaha yang dimodelkan; bukan klasifikasi resmi skala bisnis.',
+      anchored:false,independent:true,units,capacityFactor,baseFrequency,
+      warning:'Potensi dibangun dari asumsi harga dan kapasitas profil, bukan dikalibrasi ke SV/transaksi aktual. Harga, frekuensi dan kapasitas perlu konfirmasi merchant; hasil bukan omzet aktual terverifikasi.'};
   }
   const api=Object.freeze({build,types});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MerchantProfiles=api;

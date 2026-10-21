@@ -47,7 +47,7 @@ const snapshot=JSON.stringify(raw);sim.suggest(raw,'Kuliner',period);assert.equa
 console.log('Simulation: calendar YTD, leap year, location hints, capture share, zero and manual precedence passed.');
 const one=sim.suggest({totals:{edc:1},mids:[{mid:'a'}]},'Kuliner',period);
 const five=sim.suggest({totals:{edc:5},mids:[{mid:'a'},{mid:'b'}]},'Kuliner',period,{units:999});
-assert.equal(five.inputs.units,5);assert.equal(five.ytd,one.ytd*5);
+assert.equal(five.inputs.units,5);assert(Math.abs(five.ytd-one.ytd*Math.sqrt(5))<.01);
 assert.equal(five.machineBased,true);
 assert.equal(sim.suggest({totals:{edc:0},mids:[]},'Kuliner',period).ytd,null);
 assert.equal(sim.suggest({mids:[{mid:'a'}]},'Kuliner',period).ytd,null);
