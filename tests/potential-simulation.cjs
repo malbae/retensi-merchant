@@ -1,4 +1,8 @@
 const assert=require('node:assert/strict'),sim=require('../potential-simulation.js');
+assert.deepEqual(sim.summarizeGaps([{potentialSvGap:100},{potentialSvGap:0},{potentialSvGap:50},{potentialSvGap:null},{potentialSvGap:NaN}]),{total:150,covered:3,missing:2,count:5});
+assert.equal(sim.summarizeGaps([]).total,null);
+assert.equal(sim.summarizeGaps([{potentialSvGap:null}]).total,null);
+assert.equal(sim.summarizeGaps([{potentialSvGap:0}]).total,0);
 const period={year:2026,month:10},raw={address:'Blok M Plaza',kabupaten:'Jakarta Selatan'};
 const a=sim.suggest(raw,'Kuliner',period);
 assert.equal(a.inputs.locationType,'shopping');assert(a.inputs.weekendVisitors>a.inputs.weekdayVisitors);

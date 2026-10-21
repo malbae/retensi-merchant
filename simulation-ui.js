@@ -39,9 +39,23 @@
   const previousExport=merchantExcelRows;
   merchantExcelRows=function(){return previousExport().map(row=>{const raw=find(row.channel,row.id);if(!raw)return row;const p=effective(row.channel,raw),actual=(row.channel==='EDC'?edcMetric(raw):livinMetric(raw)).sv;return {...row,potentialBasis:p.basis+(p.automatic?' · otomatis':''),monthlyCashflow:p.cashflowMonthly,annualCashflow:p.cashflowYtd,potentialSvYtd:p.ytd,potentialSvGap:actual===null||p.ytd===null?null:Math.max(p.ytd-actual,0),potentialLocation:p.simulated?p.locationLabel:'Input manual',potentialLocationSource:p.simulated?p.place.locationText:'',potentialWeekday:p.simulated?p.inputs.weekdayVisitors:'',potentialWeekend:p.simulated?p.inputs.weekendVisitors:'',potentialTicket:p.simulated?p.inputs.ticket:'',potentialWeekdayDays:p.simulated?p.days.weekday:'',potentialWeekendDays:p.simulated?p.days.weekend:'',potentialCapture:p.simulated?p.inputs.share:'',potentialUnits:p.simulated?p.inputs.units:''}})};
   const previousWorkspace=renderWorkspace;
+  const gapCard=(title,summary,period)=>`<article class="potential-gap-card"><h3>${title}</h3><strong>${compact(summary.total)}</strong><span>${rupiah(summary.total)}</span><p>${period} · ${summary.covered} dari ${summary.count} merchant/relasi dihitung${summary.missing?` · ${summary.missing} belum tersedia`:''}</p></article>`;
+  const previousHome=renderHome;
+  renderHome=function(){
+    previousHome();document.getElementById('potentialGapDashboard')?.remove();
+    const rows=merchantExcelRows(),edc=rows.filter(r=>r.channel==='EDC'),livin=rows.filter(r=>r.channel==='LIVIN');
+    const samePeriod=getReportPeriod('EDC').value===getReportPeriod('LIVIN').value;
+    const combined=MerchantSimulation.summarizeGaps(rows);
+    document.querySelector('#homeView .dashboard-content')?.insertAdjacentHTML('beforebegin',`<section id="potentialGapDashboard" class="dashboard-panel potential-gap-dashboard" aria-label="Total gap potensi sales volume YTD"><h2>Total Gap Potensi SV YTD</h2><p>Potensi SV YTD dikurangi SV YTD aktual, minimal Rp 0 per merchant. Ini peluang tambahan transaksi, bukan gap saldo ke target 20%.</p><div class="potential-gap-grid">${gapCard('EDC',MerchantSimulation.summarizeGaps(edc),reportPeriodLabel('EDC'))}${gapCard("Livin’ Merchant",MerchantSimulation.summarizeGaps(livin),reportPeriodLabel('LIVIN'))}${samePeriod?gapCard('Gabungan dua kanal',combined,reportPeriodLabel('EDC')):'<article class="potential-gap-card"><h3>Gabungan dua kanal</h3><p>Periode kanal berbeda. Samakan periode YTD untuk melihat total gabungan.</p></article>'}</div><p class="potential-gap-note">Total menjumlahkan gap positif tiap merchant, termasuk skenario simulasi yang tampil pada daftar. Merchant pada dua kanal belum dideduplikasi. Data yang belum dapat dihitung tidak dianggap nol.</p></section>`);
+  };
   const previousRow=merchantRow;
   merchantRow=function(o){const p=effective(currentKanal,o.raw);const html=previousRow(o);return currentKanal==='EDC'&&p.simulated&&!p.available?html.replace('Belum diisi','Menunggu jumlah mesin EDC'):html};
-  renderWorkspace=function(reset){previousWorkspace(reset);document.getElementById('listSubheading').textContent+=' · Potensi berlabel simulasi adalah skenario asumsi, bukan omzet aktual.'};
+  renderWorkspace=function(reset){previousWorkspace(reset);document.getElementById('listSubheading').textContent+=' · Potensi berlabel simulasi adalah skenario asumsi, bukan omzet aktual.';
+    const keys=new Set(workspaceRows().map(r=>r.key));
+    const rows=merchantExcelRows().filter(r=>r.channel===currentKanal&&keys.has(r.id));
+    document.getElementById('potentialGapRail')?.remove();
+    document.getElementById('summaryRail').insertAdjacentHTML('beforeend',`<section id="potentialGapRail" class="potential-gap-rail">${gapCard('Total Gap Potensi SV YTD',MerchantSimulation.summarizeGaps(rows),reportPeriodLabel(currentKanal))}<p>Sesuai seluruh hasil filter, bukan hanya halaman ini. Termasuk simulasi; bukan gap saldo 20%.</p></section>`);
+  };
   const previousDetail=openDetail;
   openDetail=function(ch,key){previousDetail(ch,key);for(const id of ['simulationUse','simulationManual']){const button=document.getElementById(id);if(button)button.disabled=false}};
   const previousMethodology=openMethodology;

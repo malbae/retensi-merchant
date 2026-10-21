@@ -46,6 +46,10 @@
     }
     return suggest(raw,category,period,saved?.simulation||{});
   }
-  const api=Object.freeze({presets,locations,location,calendar,suggest,effective});
+  function summarizeGaps(rows){
+    const available=rows.filter(r=>typeof r.potentialSvGap==='number'&&Number.isFinite(r.potentialSvGap)&&r.potentialSvGap>=0);
+    return {total:available.length?available.reduce((sum,r)=>sum+r.potentialSvGap,0):null,covered:available.length,missing:rows.length-available.length,count:rows.length};
+  }
+  const api=Object.freeze({presets,locations,location,calendar,suggest,effective,summarizeGaps});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MerchantSimulation=api;
 })(typeof window!=='undefined'?window:this);

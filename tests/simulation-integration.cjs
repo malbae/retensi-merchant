@@ -3,7 +3,7 @@ const categories=require('../business-categories.js'),simulation=require('../pot
 const rows=[{id:'a',merchant_name:'Cafe A',lob:'Restoran',totals:{edc:3},mids:[]},{id:'b',merchant_name:'Cafe B',lob:'Restoran',totals:{edc:5},mids:[]}];
 const inputs={'EDC::b':{basis:'real',realRevenue:100000000}};
 const ctx={MerchantCategories:categories,MerchantSimulation:simulation,EDC_RELATIONSHIPS:rows,LIVIN_MERCHANTS:[],potentialRankingCache:new Map(),readPotentialStore:()=>inputs,potentialStoreKey:(ch,key)=>ch+'::'+key,getReportPeriod:()=>({year:2026,month:10}),edcMetric:()=>({sv:1000000}),livinMetric:()=>({sv:0})};
-for(const n of ['potentialSection','initPotentialForm','renderWorkspace','openMethodology','openDetail','merchantRow'])ctx[n]=()=>'';
+for(const n of ['potentialSection','initPotentialForm','renderWorkspace','renderHome','openMethodology','openDetail','merchantRow'])ctx[n]=()=>'';
 ctx.merchantExcelRows=()=>rows.map(r=>({channel:'EDC',id:r.id}));
 vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../simulation-ui.js'),'utf8'),ctx);
 const ranked=ctx.potentialVolumeRankings('EDC');
