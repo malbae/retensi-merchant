@@ -17,15 +17,15 @@ for(const category of Object.keys(sim.presets)){
   const m=sim.suggest({},category,period);
   assert.equal(m.resolvedLocationType,sim.categoryPatterns[category]);assert.equal(m.automaticPattern,true);
 }
-assert.equal(sim.suggest({address:'Mall ABC'},'Pendidikan',period).resolvedLocationType,'office');
-assert.equal(sim.suggest({address:'Office ABC'},'Kuliner',period).resolvedLocationType,'shopping');
+assert.equal(sim.suggest({address:'Mall ABC'},'Pendidikan',period).resolvedLocationType,'shopping');
+assert.equal(sim.suggest({address:'Office ABC'},'Kuliner',period).resolvedLocationType,'office');
 assert.equal(sim.suggest({},'Belum terklasifikasi',period).resolvedLocationType,'neutral');
 const manualPattern=sim.suggest({},'Pendidikan',period,{locationType:'shopping'});
 assert.equal(manualPattern.automaticPattern,false);assert.equal(manualPattern.resolvedLocationType,'shopping');
 const original=sim.suggest({},'Kuliner',period),reclassified=sim.suggest({},'Pendidikan',period,original.inputs);
 assert.equal(reclassified.resolvedLocationType,'office');assert(reclassified.inputs.weekdayVisitors>reclassified.inputs.weekendVisitors);assert.equal(reclassified.inputs.ticket,sim.presets.Pendidikan[1]);
 const legacy=sim.effective({},'Pendidikan',period,{basis:'category',simulationVersion:1,simulation:{locationType:'shopping',weekdayVisitors:999,weekendVisitors:999,ticket:999,share:50}});
-assert.equal(legacy.resolvedLocationType,'office');assert.equal(legacy.inputs.share,50);assert.equal(legacy.inputs.ticket,sim.presets.Pendidikan[1]);
+assert.equal(legacy.resolvedLocationType,'office');assert.equal(legacy.inputs.share,50);assert.equal(legacy.inputs.ticket,999);assert.equal(legacy.inputs.weekdayVisitors,999);
 const explicit=sim.effective({},'Pendidikan',period,{basis:'category',simulationVersion:2,simulation:{locationType:'shopping',weekdayVisitors:999,weekendVisitors:999,ticket:999}});
 assert.equal(explicit.resolvedLocationType,'shopping');assert.equal(explicit.inputs.ticket,999);
 assert.equal(sim.location({address:'Gedung perkantoran ABC'}).type,'office');

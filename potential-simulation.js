@@ -8,7 +8,7 @@
     'Transportasi & Logistik':[30,50000],'Keuangan':[10,100000],
     'Multi bisnis':[30,75000],'Lainnya':[30,50000],'Belum terklasifikasi':[30,50000]
   };
-  const locations={neutral:{label:'Netral / belum diketahui',weekday:1,weekend:1},office:{label:'Perkantoran (skenario weekday ramai)',weekday:1.2,weekend:.7},shopping:{label:'Pusat belanja / wisata (skenario weekend ramai)',weekday:1,weekend:1.5}};
+  const locations={neutral:{label:'Aktivitas seimbang / kawasan belum dipastikan',weekday:1,weekend:1},office:{label:'Aktivitas dominan weekday',weekday:1.2,weekend:.7},shopping:{label:'Aktivitas dominan weekend',weekday:1,weekend:1.5}};
   // Category scenarios are editable assumptions, not evidence of a merchant's physical location.
   const categoryPatterns=Object.freeze({'Kuliner':'shopping','Retail & Perdagangan':'shopping','Kecantikan':'shopping','Perhotelan & Hiburan':'shopping','Pendidikan':'office','Keuangan':'office','Jasa':'office','Transportasi & Logistik':'office','Kesehatan':'neutral','Otomotif':'neutral','Multi bisnis':'neutral','Lainnya':'neutral','Belum terklasifikasi':'neutral'});
   const finite=(v,fallback=0)=>Number.isFinite(Number(v))&&String(v).trim()!==''?Math.max(0,Number(v)):fallback;
@@ -27,9 +27,9 @@
     return {weekday,weekend};
   }
   function suggest(raw,category,period,override={}){
-    const seed=presets[category]||presets['Belum terklasifikasi'],place=location(raw),automaticPattern=override.locationType==='auto'||!Object.hasOwn(locations,override.locationType),type=automaticPattern?(categoryPatterns[category]||'neutral'):override.locationType,factors=locations[type];
+    const seed=presets[category]||presets['Belum terklasifikasi'],place=location(raw),automaticPattern=override.locationType==='auto'||!Object.hasOwn(locations,override.locationType),type=automaticPattern?(place.type!=='neutral'?place.type:categoryPatterns[category]||'neutral'):override.locationType,factors=locations[type];
     // Refresh category-derived transaction defaults after reclassification; keep other saved inputs.
-    if(automaticPattern&&override.categoryAtSave&&override.categoryAtSave!==category){override={...override};delete override.weekdayVisitors;delete override.weekendVisitors;delete override.ticket}
+    if(automaticPattern&&!override.preserveEditedInputs&&override.categoryAtSave&&override.categoryAtSave!==category){override={...override};delete override.weekdayVisitors;delete override.weekendVisitors;delete override.ticket}
     const machineBased=Array.isArray(raw.mids)||Object.hasOwn(raw.totals||{},'edc');
     const count=raw.totals?.edc,machineCount=count!==null&&count!==undefined&&String(count).trim()!==''&&Number.isFinite(Number(count))&&Number(count)>=0?Math.floor(Number(count)):null;
     const units=machineBased?(machineCount||0):Math.max(1,Math.floor(finite(override.units,1)));
@@ -41,7 +41,7 @@
     const ytd=cashflowYtd*inputs.share/100,monthly=cashflowMonthly*inputs.share/100;
     if(![ytd,monthly,cashflowYtd,cashflowMonthly].every(Number.isFinite))throw new Error('Angka estimasi terlalu besar');
     const available=!machineBased||machineCount>0;
-    return {inputs,days,category,place,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?'Otomatis kategori '+category+' · ':'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?'Skenario mengikuti kategori bisnis, bukan bukti kawasan aktual':'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Estimasi per mesin EDC':'Estimasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
+    return {inputs,days,category,place,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?(place.type!=='neutral'?'Petunjuk alamat · ':'Perkiraan kategori '+category+' · '):'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?(place.type!=='neutral'?'Petunjuk teks alamat dari data sumber; belum diverifikasi di lapangan':'Perkiraan aktivitas dari kategori bisnis; kawasan belum dipastikan'):'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Estimasi per mesin EDC':'Estimasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
   }
   function effective(raw,category,period,saved){
     if(saved&&saved.basis!=='category'){
@@ -52,6 +52,7 @@
   }
   function simulationInputs(saved){
     const inputs={...(saved?.simulation||{})};
+    if(saved?.basis==='category'&&saved.simulation)inputs.preserveEditedInputs=true;
     // Older scenarios had no category-following mode. Recalculate scenario defaults without rewriting stored records.
     if(saved?.basis==='category'&&saved.simulationVersion!==2){inputs.locationType='auto';inputs.categoryAtSave='legacy';}
     return inputs;
