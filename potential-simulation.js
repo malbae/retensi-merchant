@@ -26,14 +26,18 @@
   }
   function suggest(raw,category,period,override={}){
     const seed=presets[category]||presets['Belum terklasifikasi'],place=location(raw),type=Object.hasOwn(locations,override.locationType)?override.locationType:place.type,factors=locations[type];
+    const machineBased=Array.isArray(raw.mids)||Object.hasOwn(raw.totals||{},'edc');
+    const count=raw.totals?.edc,machineCount=count!==null&&count!==undefined&&String(count).trim()!==''&&Number.isFinite(Number(count))&&Number(count)>=0?Math.floor(Number(count)):null;
+    const units=machineBased?(machineCount||0):Math.max(1,Math.floor(finite(override.units,1)));
     const openDays=Array.isArray(override.openDays)?[...new Set(override.openDays.map(Number).filter(v=>Number.isInteger(v)&&v>=0&&v<=6))]:[1,2,3,4,5,6,0];
-    const inputs={locationType:type,weekdayVisitors:finite(override.weekdayVisitors,Math.round(seed[0]*factors.weekday)),weekendVisitors:finite(override.weekendVisitors,Math.round(seed[0]*factors.weekend)),ticket:finite(override.ticket,seed[1]),share:Math.min(100,finite(override.share,100)),units:Math.max(1,Math.floor(finite(override.units,1))),openDays};
+    const inputs={locationType:type,weekdayVisitors:finite(override.weekdayVisitors,Math.round(seed[0]*factors.weekday)),weekendVisitors:finite(override.weekendVisitors,Math.round(seed[0]*factors.weekend)),ticket:finite(override.ticket,seed[1]),share:Math.min(100,finite(override.share,100)),units,openDays};
     const days=calendar(period.year,period.month,openDays),previous=period.month===1?{weekday:0,weekend:0}:calendar(period.year,period.month-1,openDays);
     const weekdayCashflow=days.weekday*inputs.weekdayVisitors*inputs.ticket*inputs.units,weekendCashflow=days.weekend*inputs.weekendVisitors*inputs.ticket*inputs.units;
     const cashflowYtd=weekdayCashflow+weekendCashflow,cashflowMonthly=((days.weekday-previous.weekday)*inputs.weekdayVisitors+(days.weekend-previous.weekend)*inputs.weekendVisitors)*inputs.ticket*inputs.units;
     const ytd=cashflowYtd*inputs.share/100,monthly=cashflowMonthly*inputs.share/100;
     if(![ytd,monthly,cashflowYtd,cashflowMonthly].every(Number.isFinite))throw new Error('Angka simulasi terlalu besar');
-    return {inputs,days,category,place,locationLabel:factors.label,weekdayCashflow,weekendCashflow,cashflowYtd,cashflowMonthly,ytd,monthly,basis:'Simulasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
+    const available=!machineBased||machineCount>0;
+    return {inputs,days,category,place,machineBased,machineCount,available,locationLabel:factors.label,weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Simulasi per mesin EDC':'Simulasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
   }
   function effective(raw,category,period,saved){
     if(saved&&saved.basis!=='category'){
