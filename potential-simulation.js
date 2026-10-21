@@ -60,13 +60,6 @@
     const available=rows.filter(r=>typeof r.potentialSvGap==='number'&&Number.isFinite(r.potentialSvGap)&&r.potentialSvGap>=0);
     return {total:available.length?available.reduce((sum,r)=>sum+r.potentialSvGap,0):null,covered:available.length,missing:rows.length-available.length,count:rows.length};
   }
-  function constrain(model,actualSv){
-    if(!model.simulated)return model;
-    const anchored=typeof actualSv==='number'&&Number.isFinite(actualSv)&&actualSv>0;
-    const ceiling=anchored?actualSv*1.1:null;
-    const ytd=anchored&&model.ytd!==null?Math.min(model.ytd,ceiling):null;
-    return {...model,uncappedYtd:model.ytd,ytd,monthly:ytd===null?null:model.ytd>0?model.monthly*ytd/model.ytd:0,actualSv:anchored?actualSv:null,ceiling,capRate:.1,calibrated:true,basis:model.basis+' · batas SV aktual +10%'};
-  }
-  const api=Object.freeze({presets,locations,categoryPatterns,location,calendar,suggest,effective,simulationInputs,summarizeGaps,constrain});
+  const api=Object.freeze({presets,locations,categoryPatterns,location,calendar,suggest,effective,simulationInputs,summarizeGaps});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MerchantSimulation=api;
 })(typeof window!=='undefined'?window:this);

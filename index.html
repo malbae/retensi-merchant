@@ -1135,7 +1135,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 </div>
 
 <script src="business-categories.js?v=manualcategory1"></script>
-<script src="potential-simulation.js?v=svcap1"></script>
+<script src="potential-simulation.js?v=restorepattern1"></script>
 <script src="database.js?v=central2"></script>
 <script src="shared-database.js?v=manualcategory1"></script>
 <script>
@@ -1302,7 +1302,7 @@ function initPotentialForm(channel,key){
     document.getElementById('potentialMonthlyRevenue').textContent=revenue>0?compact(revenue):'—';
     document.getElementById('potentialMonthlyPayroll').textContent=payroll>0?compact(payroll):'—';
     document.getElementById('potentialAnnualRevenue').textContent=annual>0?compact(annual):'—';
-    const raw=channel==='EDC'?EDC_RELATIONSHIPS.find(r=>r.id===key):LIVIN_MERCHANTS.find(r=>r.key===key),actual=raw?(channel==='EDC'?edcMetric(raw):livinMetric(raw)).sv:0;document.getElementById('potentialYtdGap').textContent=annual>0?(actual!==null&&annual<=actual?'Tidak ada gap tambahan':compact(actual===null?null:Math.max(annual-actual,0))):'—';
+    const raw=channel==='EDC'?EDC_RELATIONSHIPS.find(r=>r.id===key):LIVIN_MERCHANTS.find(r=>r.key===key),actual=raw?(channel==='EDC'?edcMetric(raw):livinMetric(raw)).sv:0;document.getElementById('potentialYtdGap').textContent=annual>0?compact(actual===null?null:Math.max(annual-actual,0)):'—';
     document.getElementById('potentialPayrollShare').textContent=share===null?'—':(share*100).toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
     document.getElementById('potentialRevenueBasis').textContent=d.basis==='real'?'Berdasarkan omzet real bulanan':`${idFmt.format(visitors)} pengunjung × ${ticket>0?rupiah(ticket):'harga rata-rata'} × ${days} hari`;
     document.getElementById('potentialPayrollPeople').textContent=employees>0?`${idFmt.format(employees)} karyawan${salary>0?' × '+rupiah(salary):''}`:'Belum ada input karyawan';
@@ -1313,7 +1313,7 @@ function initPotentialForm(channel,key){
     const summary=document.getElementById('potentialSummary');
     if(revenue>0){
       const payrollText=payroll>0?` Potensi payroll sekitar <b>${compact(payroll)}</b> per bulan untuk <b>${idFmt.format(employees)} karyawan</b>.`:employees>0?' Isi rata-rata gaji untuk mengestimasi nominal payroll.':'';
-      summary.innerHTML=`Potensi cashflow merchant sekitar <b>${compact(revenue)}</b> per bulan; proyeksi YTD <b>${compact(annual)}</b> hingga ${reportPeriodLabel(channel)}. Gap potensi terhadap SV YTD aktual: <b>${actual!==null&&annual<=actual?'Tidak ada gap tambahan':compact(actual===null?null:Math.max(annual-actual,0))}</b>.${payrollText}`;
+      summary.innerHTML=`Potensi cashflow merchant sekitar <b>${compact(revenue)}</b> per bulan; proyeksi YTD <b>${compact(annual)}</b> hingga ${reportPeriodLabel(channel)}. Gap potensi terhadap SV YTD aktual: <b>${compact(actual===null?null:Math.max(annual-actual,0))}</b>.${payrollText}`;
     }else summary.textContent='Isi data merchant untuk melihat potensi cashflow dan payroll.';
     return {data:d,revenue,payroll,annual,share};
   }
@@ -1641,7 +1641,7 @@ function potentialVolumeRankings(channel){
 const _workspaceRowsPotential=workspaceRows;
 workspaceRows=function(){const rows=_workspaceRowsPotential();if(document.getElementById('sortSelect').value==='potential'){const ranks=potentialVolumeRankings(currentKanal);rows.sort((a,b)=>(ranks.get(b.key)?.ytd||0)-(ranks.get(a.key)?.ytd||0)||a.name.localeCompare(b.name))}return rows};
 const _merchantRowPotential=merchantRow;
-merchantRow=function(o){const p=potentialVolumeRankings(currentKanal).get(o.key),cell=`<div class="value-cell metric-potential"><small>Potensi SV / YTD</small><b>${p?compact(p.ytd):'—'}</b><span class="potential-rank ${p?'available':''}">${p?(p.simulated?'Ranking simulasi #':'Ranking #')+p.rank+' dari '+p.total:'Belum diisi'}</span>${p?`<em>${p.basis} · ${getReportPeriod(currentKanal).month} bulan</em><em>Gap potensi SV YTD</em><b>${(o.x.sv!==null&&p.ytd<=o.x.sv?'Tidak ada gap tambahan':compact(o.x.sv===null?null:Math.max(p.ytd-o.x.sv,0)))}</b>`:''}</div>`;return _merchantRowPotential(o).replace('<button class="row-open"',cell+'<button class="row-open"')};
+merchantRow=function(o){const p=potentialVolumeRankings(currentKanal).get(o.key),cell=`<div class="value-cell metric-potential"><small>Potensi SV / YTD</small><b>${p?compact(p.ytd):'—'}</b><span class="potential-rank ${p?'available':''}">${p?(p.simulated?'Ranking simulasi #':'Ranking #')+p.rank+' dari '+p.total:'Belum diisi'}</span>${p?`<em>${p.basis} · ${getReportPeriod(currentKanal).month} bulan</em><em>Gap potensi SV YTD</em><b>${compact(o.x.sv===null?null:Math.max(p.ytd-o.x.sv,0))}</b>`:''}</div>`;return _merchantRowPotential(o).replace('<button class="row-open"',cell+'<button class="row-open"')};
 function refreshPotentialViews(){if(currentUser){renderHome();if(!document.getElementById('workspaceView').classList.contains('hidden'))renderWorkspace(false)}}
 function getEvidence(ch,key){return readStore(FAIR_EVIDENCE_KEY,{})[fairKey(ch,key)]||{}}
 const _openWorkspaceV2=openWorkspace;
@@ -1922,6 +1922,6 @@ MerchantDB.ready.then(()=>{if(MerchantDB.status()==='shared'){EDC_RELATIONSHIPS.
 </script>
 
 <script src="category-ui.js?v=manualcategory1"></script>
-<script src="simulation-ui.js?v=svcap1"></script>
+<script src="simulation-ui.js?v=restorepattern1"></script>
 </body>
 </html>
