@@ -1,5 +1,6 @@
 (function(root){
   'use strict';
+  const profileModel=typeof module!=='undefined'&&module.exports?require('./merchant-profiles.js'):root.MerchantProfiles;
   // Editable scenario seeds, deliberately NOT observed merchant revenue or market benchmarks.
   const presets={
     'Kuliner':[80,35000],'Retail & Perdagangan':[50,75000],'Kesehatan':[20,150000],
@@ -34,14 +35,15 @@
     const count=raw.totals?.edc,machineCount=count!==null&&count!==undefined&&String(count).trim()!==''&&Number.isFinite(Number(count))&&Number(count)>=0?Math.floor(Number(count)):null;
     const units=machineBased?(machineCount||0):Math.max(1,Math.floor(finite(override.units,1)));
     const openDays=Array.isArray(override.openDays)?[...new Set(override.openDays.map(Number).filter(v=>Number.isInteger(v)&&v>=0&&v<=6))]:[1,2,3,4,5,6,0];
-    const inputs={locationType:automaticPattern?'auto':type,categoryAtSave:category,weekdayVisitors:finite(override.weekdayVisitors,Math.round(seed[0]*factors.weekday)),weekendVisitors:finite(override.weekendVisitors,Math.round(seed[0]*factors.weekend)),ticket:finite(override.ticket,seed[1]),share:Math.min(100,finite(override.share,100)),units,openDays};
     const days=calendar(period.year,period.month,openDays),previous=period.month===1?{weekday:0,weekend:0}:calendar(period.year,period.month-1,openDays);
+    const profile=profileModel.build(raw,category,period,units,days,factors,seed);
+    const inputs={locationType:automaticPattern?'auto':type,categoryAtSave:category,weekdayVisitors:finite(override.weekdayVisitors,profile.weekday),weekendVisitors:finite(override.weekendVisitors,profile.weekend),ticket:finite(override.ticket,profile.ticket),share:Math.min(100,finite(override.share,100)),units,openDays};
     const weekdayCashflow=days.weekday*inputs.weekdayVisitors*inputs.ticket*inputs.units,weekendCashflow=days.weekend*inputs.weekendVisitors*inputs.ticket*inputs.units;
     const cashflowYtd=weekdayCashflow+weekendCashflow,cashflowMonthly=((days.weekday-previous.weekday)*inputs.weekdayVisitors+(days.weekend-previous.weekend)*inputs.weekendVisitors)*inputs.ticket*inputs.units;
     const ytd=cashflowYtd*inputs.share/100,monthly=cashflowMonthly*inputs.share/100;
     if(![ytd,monthly,cashflowYtd,cashflowMonthly].every(Number.isFinite))throw new Error('Angka estimasi terlalu besar');
     const available=!machineBased||machineCount>0;
-    return {inputs,days,category,place,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?(place.type!=='neutral'?'Petunjuk alamat · ':'Perkiraan kategori '+category+' · '):'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?(place.type!=='neutral'?'Petunjuk teks alamat dari data sumber; belum diverifikasi di lapangan':'Perkiraan aktivitas dari kategori bisnis; kawasan belum dipastikan'):'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:machineBased?'Estimasi per mesin EDC':'Estimasi kategori & lokasi',simulated:true,automatic:!Object.keys(override).length};
+    return {inputs,days,category,place,profile,machineBased,machineCount,available,automaticPattern,resolvedLocationType:type,locationLabel:(automaticPattern?(place.type!=='neutral'?'Petunjuk alamat · ':'Perkiraan kategori '+category+' · '):'Pilihan manual · ')+factors.label,patternBasis:automaticPattern?(place.type!=='neutral'?'Petunjuk teks alamat dari data sumber; belum diverifikasi di lapangan':'Perkiraan aktivitas dari kategori bisnis; kawasan belum dipastikan'):'Pola kawasan dipilih manual; tidak mengikuti perubahan kategori',weekdayCashflow,weekendCashflow,cashflowYtd:available?cashflowYtd:null,cashflowMonthly:available?cashflowMonthly:null,ytd:available?ytd:null,monthly:available?monthly:null,basis:'Estimasi profil · '+profile.label,simulated:true,automatic:!Object.keys(override).length};
   }
   function effective(raw,category,period,saved){
     if(saved&&saved.basis!=='category'){

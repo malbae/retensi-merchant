@@ -18,3 +18,5 @@
   Cache-Control: no-store, max-age=0
 /merchant-references.js
   Cache-Control: no-store, max-age=0
+/merchant-profiles.js
+  Cache-Control: no-store, max-age=0

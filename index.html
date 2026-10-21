@@ -994,7 +994,7 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 @media(min-width:521px) and (max-width:760px){.merchant-row{grid-template-columns:minmax(0,1.4fr) minmax(90px,1fr) 38px;grid-template-areas:"identity potential action" "avbal potential action" "gap potential action"}.merchant-row .metric-sv,.merchant-row .metric-retention{display:none}.identity-cell{grid-area:identity}.metric-avbal{grid-area:avbal}.metric-gap{grid-area:gap}.metric-potential{grid-area:potential}.row-open{grid-area:action}}
 @media(max-width:520px){.merchant-row{grid-template-areas:"identity action" "avbal action" "gap action" "potential action"}.metric-potential{grid-area:potential;border-top:1px solid #e6edf1;padding-top:8px}.metric-potential small{display:inline-block;margin-right:7px}.metric-potential>b{display:inline-block}.metric-potential em{display:inline-block;margin-left:7px}.potential-rank{margin-left:7px}}
 </style>
-<link rel="stylesheet" href="readability.css?v=research1">
+<link rel="stylesheet" href="readability.css?v=profiles1">
 </head>
 <body>
 <button id="sharedConnectionStatus" type="button" onclick="refreshSharedData(this)" style="position:fixed;bottom:10px;left:10px;z-index:9000;max-width:calc(100vw - 20px);display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #dce6ed;border-radius:8px;padding:6px 9px;color:#647d8d;font-size:14px;box-shadow:0 2px 8px #1231;cursor:pointer" title="Refresh data" aria-label="Refresh data"><span aria-hidden="true">↻</span><time id="sharedLastSync">—</time></button>
@@ -1137,7 +1137,8 @@ html{-webkit-text-size-adjust:100%}body{min-width:320px}.stage{min-height:100dvh
 
 <script src="merchant-references.js?v=research1"></script>
 <script src="business-categories.js?v=research1"></script>
-<script src="potential-simulation.js?v=research1"></script>
+<script src="merchant-profiles.js?v=profiles1"></script>
+<script src="potential-simulation.js?v=profiles1"></script>
 <script src="database.js?v=central2"></script>
 <script src="shared-database.js?v=manualcategory1"></script>
 <script>
@@ -1924,6 +1925,6 @@ MerchantDB.ready.then(()=>{if(MerchantDB.status()==='shared'){EDC_RELATIONSHIPS.
 </script>
 
 <script src="category-ui.js?v=research1"></script>
-<script src="simulation-ui.js?v=research1"></script>
+<script src="simulation-ui.js?v=profiles1"></script>
 </body>
 </html>
