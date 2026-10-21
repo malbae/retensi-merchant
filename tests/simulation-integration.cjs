@@ -9,6 +9,8 @@ vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../si
 const ranked=ctx.potentialVolumeRankings('EDC');
 assert.equal(ranked.size,2);assert.equal(ranked.get('b').ytd,1000000000);assert.equal(ranked.get('b').simulated,false);
 assert.equal(ranked.get('a').simulated,true);assert(ranked.get('a').basis.includes('otomatis'));
+assert(ranked.get('a').ytd<=1100000.001);
+assert.equal(ranked.get('a').capRate,.1);
 const exported=ctx.merchantExcelRows();assert.equal(exported[0].potentialSvYtd,ranked.get('a').ytd);
 assert.equal(exported[1].potentialSvYtd,ranked.get('b').ytd);
 assert.equal(exported[0].potentialUnits,3);

@@ -4,6 +4,15 @@ assert.equal(sim.summarizeGaps([]).total,null);
 assert.equal(sim.summarizeGaps([{potentialSvGap:null}]).total,null);
 assert.equal(sim.summarizeGaps([{potentialSvGap:0}]).total,0);
 const period={year:2026,month:10},raw={address:'Blok M Plaza',kabupaten:'Jakarta Selatan'};
+const capped=sim.constrain(sim.suggest({},'Kuliner',period),1000000);
+assert(Math.abs(capped.ytd-1100000)<.001);
+assert(capped.uncappedYtd>capped.ytd);
+assert.equal(sim.constrain(sim.suggest({},'Kuliner',period),null).ytd,null);
+assert.equal(sim.constrain(sim.suggest({},'Kuliner',period),0).ytd,null);
+assert.equal(sim.constrain(sim.suggest({},'Kuliner',period),NaN).ytd,null);
+const below=sim.constrain(sim.suggest({},'Kuliner',period,{weekdayVisitors:0,weekendVisitors:0}),1000000);
+assert.equal(below.ytd,0); // Never invent positive revenue to remove a genuine zero gap.
+const manual={simulated:false,ytd:999999999};assert.equal(sim.constrain(manual,100),manual);
 const a=sim.suggest(raw,'Kuliner',period);
 assert.equal(a.inputs.locationType,'auto');assert.equal(a.resolvedLocationType,'shopping');assert(a.inputs.weekendVisitors>a.inputs.weekdayVisitors);
 for(const category of Object.keys(sim.presets)){
